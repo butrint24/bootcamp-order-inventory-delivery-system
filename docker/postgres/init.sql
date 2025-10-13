@@ -1,0 +1,1 @@
+-- ktu vjen sql skripta
