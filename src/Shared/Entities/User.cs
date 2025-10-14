@@ -1,29 +1,39 @@
 using System;
+using Shared.Enums;
 
 namespace Shared.Entities
 {
-    // Enum matching PostgreSQL role_type
-    public enum RoleType
-    {
-        USER,
-        ADMIN
-    }
-
     public class User
     {
-        // Primary key
-        public Guid UserId { get; set; } = Guid.NewGuid();
+        public Guid UserId { get; private set; } = Guid.NewGuid();
+        public string Name { get; private set; } = null!;
+        public string Surname { get; private set; } = null!;
+        public DateTime? DateOfBirth { get; private set; }
+        public string Tel { get; private set; } = null!;
+        public string Address { get; private set; } = null!;
+        public RoleType Role { get; private set; }
 
-        public string Name { get; set; }
+        private User() { }
 
-        public string Surname { get; set; }
+        public User(string name, string surname, DateTime? dateOfBirth, string tel, string address, RoleType role)
+        {
+            Name = name;
+            Surname = surname;
+            DateOfBirth = dateOfBirth;
+            Tel = tel;
+            Address = address;
+            Role = role;
+        }
 
-        public DateTime? DateOfBirth { get; set; }
+        public void UpdateContactInfo(string tel, string address)
+        {
+            Tel = tel;
+            Address = address;
+        }
 
-        public string Tel { get; set; }
-
-        public string Address { get; set; }
-
-        public RoleType Role { get; set; }
+        public void ChangeRole(RoleType newRole)
+        {
+            Role = newRole;
+        }
     }
 }

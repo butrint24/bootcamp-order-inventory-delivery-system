@@ -1,5 +1,8 @@
-public enum RoleType
+namespace Shared.Enums
+{
+    public enum RoleType
     {
-        USER,
-        ADMIN
+        User,
+        Admin
+    }
 }
