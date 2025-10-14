@@ -1,6 +1,6 @@
 using System;
 
-namespace YourNamespace.Models
+namespace Shared.Entities
 {
     // Enum matching PostgreSQL role_type
     public enum RoleType
