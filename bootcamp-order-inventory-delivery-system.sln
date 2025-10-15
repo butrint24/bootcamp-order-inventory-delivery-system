@@ -4,15 +4,15 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeliveryService", "src\DeliveryService\DeliveryService.csproj", "{9140F3CC-5EEF-4281-BAD9-6D0BD2681BB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeliveryService", "src\DeliveryService\DeliveryService.csproj", "{9140F3CC-5EEF-4281-BAD9-6D0BD2681BB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "src\Gateway\Gateway.csproj", "{318D2742-157B-1B92-9F01-01C7F80B2F48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "src\Gateway\Gateway.csproj", "{318D2742-157B-1B92-9F01-01C7F80B2F48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService", "src\OrderService\OrderService.csproj", "{F5D6AFB2-2E56-5C19-23C2-7D0AC365D2F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService", "src\OrderService\OrderService.csproj", "{F5D6AFB2-2E56-5C19-23C2-7D0AC365D2F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "src\UserService\UserService.csproj", "{83F6432B-6D5F-2D49-A8A3-BB8F6E73D199}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "src\UserService\UserService.csproj", "{83F6432B-6D5F-2D49-A8A3-BB8F6E73D199}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryService", "src\InventoryService\InventoryService.csproj", "{2D79A018-DB75-074E-6820-11C3E7B043B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InventoryService", "src\InventoryService\InventoryService.csproj", "{2D79A018-DB75-074E-6820-11C3E7B043B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
