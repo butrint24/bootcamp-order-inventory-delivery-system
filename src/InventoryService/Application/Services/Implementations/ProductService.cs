@@ -58,5 +58,45 @@ namespace Application.Services.Implementations
 
             return products;
         }
+        public async Task<Product?> UpdateAsync(Product product)
+        {
+            if (product == null)
+                throw new ArgumentNullException(nameof(product));
+
+            var existing = await _repo.GetByIdAsync(product.ProductId);
+            if (existing == null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(product.Name))
+                throw new ArgumentException("Product name is required.", nameof(product.Name));
+
+            if (product.Price < 0)
+                throw new ArgumentException("Price cannot be negative.", nameof(product.Price));
+
+            if (product.Stock < 0)
+                throw new ArgumentException("Stock cannot be negative.", nameof(product.Stock));
+
+
+            existing.Name = product.Name;
+            existing.Stock = product.Stock;
+            existing.Price = product.Price;
+            existing.Category = product.Category;
+            existing.Origin = product.Origin;
+
+            _repo.Update(existing);
+            await _repo.SaveChangesAsync();
+
+            return existing;
+        }
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var product = await _repo.GetByIdAsync(id);
+            if (product == null)
+                return false;
+
+            _repo.Remove(product);
+            await _repo.SaveChangesAsync();
+            return true;
+        }
     }
 }

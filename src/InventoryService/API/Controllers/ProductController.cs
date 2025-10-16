@@ -49,5 +49,38 @@ namespace InventoryService.API.Controllers
             var products = await _service.GetAllAsync(pageNumber, pageSize);
             return Ok(products);
         }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] Product product)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid product ID.");
+
+            if (product == null)
+                return BadRequest("Please provide product data to update.");
+
+
+            product.ProductId = id;
+
+            var updatedProduct = await _service.UpdateAsync(product);
+
+            if (updatedProduct == null)
+                return NotFound($"No product found with ID {id}.");
+
+            return Ok(updatedProduct);
+        }
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid product ID.");
+
+            var deleted = await _service.DeleteAsync(id);
+            if (!deleted)
+                return NotFound(new { message = $"Product {id} not found." });
+
+            return NoContent(); 
+        }
+
     }
 }
