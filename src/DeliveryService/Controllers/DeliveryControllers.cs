@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using DeliveryService.Models;
+using DeliveryService.Data;
 
 namespace DeliveryService.Controllers
 {
@@ -6,22 +8,32 @@ namespace DeliveryService.Controllers
     [Route("api/[controller]")]
     public class DeliveryController : ControllerBase
     {
-        private static readonly List<dynamic> Deliveries = new();
+        private readonly DeliveryDbContext _context;
 
-        //Create a new delivery
-        [HttpPost]
-        public IActionResult Create([FromBody] dynamic delivery)
+        public DeliveryController(DeliveryDbContext context)
         {
-            delivery.Id = Deliveries.Count + 1;
-            Deliveries.Add(delivery);
+            _context = context;
+        }
+
+        /// <summary>
+        /// Creates a new delivery and saves it to the database.
+        /// </summary>
+        [HttpPost]
+        public IActionResult Create([FromBody] Delivery delivery)
+        {
+            _context.Deliveries.Add(delivery);
+            _context.SaveChanges();
             return CreatedAtAction(nameof(Read), new { id = delivery.Id }, delivery);
         }
 
-        //Read
+        /// <summary>
+        /// Retrieves all deliveries from the database.
+        /// </summary>
         [HttpGet]
         public IActionResult Read()
         {
-            return Ok(Deliveries);
+            var deliveries = _context.Deliveries.ToList();
+            return Ok(deliveries);
         }
     }
 }
