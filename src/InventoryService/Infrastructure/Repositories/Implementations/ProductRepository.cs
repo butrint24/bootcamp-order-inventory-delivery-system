@@ -48,5 +48,12 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
         {
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsAsync(string name, string origin)
+        {
+            return await _context.Products
+                .AnyAsync(p => p.Name.ToLower() == name.ToLower() && p.Origin.ToLower() == origin.ToLower());
+        }
+
     }
 }

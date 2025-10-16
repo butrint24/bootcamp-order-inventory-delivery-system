@@ -10,5 +10,7 @@ namespace InventoryService.Infrastructure.Repositories.Interfaces
         void Update(Product product);
         void Remove(Product product);
         Task<int> SaveChangesAsync();
+        
+        Task<bool> ExistsAsync(string name, string origin);
     }
 }
