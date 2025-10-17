@@ -1,3 +1,4 @@
+using Application.DTOs;
 using Shared.Entities;
 using System;
 using System.Collections.Generic;
@@ -7,12 +8,11 @@ namespace Application.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<Product> CreateAsync(Product product);
-        Task<Product?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Product>> GetAllAsync(int pageNumber, int pageSize);
-        Task<Product?> UpdateAsync(Product product);
+        Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto);
+        Task<ProductResponseDto?> UpdateProductAsync(Guid id, ProductUpdateDto dto);
+        Task<ProductResponseDto?> GetByIdAsync(Guid id);
+        Task<IEnumerable<ProductResponseDto>> GetAllAsync(int pageNumber, int pageSize);
         Task<bool> DeleteAsync(Guid id);
-
         Task<bool> RestoreAsync(Guid id);
     }
 }

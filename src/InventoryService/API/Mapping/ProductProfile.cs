@@ -1,4 +1,3 @@
-// src/InventoryService/API/Mapping/ProductProfile.cs  (ose Controllers/Mapping nëse aty e ke)
 using AutoMapper;
 using Application.DTOs;
 using Shared.Entities;
@@ -23,7 +22,6 @@ namespace InventoryService.API.Controllers.Mapping
                 .ForMember(d => d.Category, opt => opt.MapFrom(s => s.Category.ToString()));
         }
 
-        // Helper i sigurt për expression tree (pa out var në expression)
         private static Shared.Enums.Category ParseCategory(string? category)
         {
             if (!string.IsNullOrWhiteSpace(category) &&
@@ -32,9 +30,7 @@ namespace InventoryService.API.Controllers.Mapping
                 return parsed;
             }
 
-            // Fallback – vendose çfarë do: default ose një vlerë specifike
-            // return Shared.Enums.Category.ACCESSORIES;
-            return default; // vlera e parë e enum-it tënd
+            return default; 
         }
     }
 }

@@ -1,6 +1,6 @@
+using Application.DTOs;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Entities;
 using System;
 using System.Threading.Tasks;
 
@@ -18,9 +18,12 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Product product)
+        public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
-            var result = await _service.CreateAsync(product);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _service.CreateProductAsync(dto);
             return Created("", result);
         }
 
@@ -51,27 +54,27 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Product product)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
             if (id == Guid.Empty)
                 return BadRequest("Invalid product ID.");
 
-            if (product == null)
-                return BadRequest("Please provide product data to update.");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-
-            product.ProductId = id;
-
-            var updatedProduct = await _service.UpdateAsync(product);
-
+            var updatedProduct = await _service.UpdateProductAsync(id, dto);
             if (updatedProduct == null)
                 return NotFound($"No product found with ID {id}.");
 
             return Ok(updatedProduct);
         }
+
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid product ID.");
+
             var ok = await _service.DeleteAsync(id);
             return ok ? NoContent() : NotFound();
         }
@@ -79,11 +82,11 @@ namespace InventoryService.API.Controllers
         [HttpPatch("restore/{id:guid}")]
         public async Task<IActionResult> Restore(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid product ID.");
+
             var restored = await _service.RestoreAsync(id);
             return restored ? Ok() : NotFound();
         }
-
     }
-
 }
-
