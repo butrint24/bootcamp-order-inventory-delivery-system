@@ -70,17 +70,12 @@ namespace InventoryService.API.Controllers
             return Ok(updatedProduct);
         }
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            if (id == Guid.Empty)
-                return BadRequest("Invalid product ID.");
-
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-                return NotFound(new { message = $"Product {id} not found." });
-
-            return NoContent(); 
-        }
-
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var ok = await _service.DeleteAsync(id); 
+        return ok ? NoContent() : NotFound();
     }
+    }
+
 }
+

@@ -5,7 +5,8 @@ using Application.Services.Implementations;
 using Application.Services.Interfaces;  
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
-using InventoryService.Mapping;
+using InventoryService.API.Controllers.Mapping;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,7 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddAutoMapper(typeof(ProductProfile));
+builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
 
 var app = builder.Build();
 

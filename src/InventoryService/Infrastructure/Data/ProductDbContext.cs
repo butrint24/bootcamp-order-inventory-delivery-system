@@ -21,8 +21,10 @@ namespace InventoryService.Infrastructure.Data
                 entity.Property(e => e.Origin).HasColumnName("origin");
                 entity.Property(e => e.Price).HasColumnName("price");
                 entity.Property(e => e.Category).HasColumnName("category").HasConversion<string>();
+                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
 
             });
+
         }
     }
 }

@@ -74,5 +74,6 @@ CREATE TABLE product (
   stock INT DEFAULT 0,
   origin TEXT,
   category TEXT NOT NULL DEFAULT 'OTHER',
-  price NUMERIC(12,2)
+  price NUMERIC(12,2),
+  IsActive BOOLEAN DEFAULT TRUE
 );

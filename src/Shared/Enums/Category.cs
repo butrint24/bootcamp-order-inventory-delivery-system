@@ -7,6 +7,7 @@ namespace Shared.Enums
         HEALTH_AND_BEAUTY,
         ACCESSORIES,
         FURNITURE,
-        ENTERTAINMENT
+        ENTERTAINMENT,
+        OTHER
     }
 }
