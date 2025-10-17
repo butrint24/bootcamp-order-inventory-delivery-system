@@ -10,7 +10,9 @@ namespace Application.Services.Interfaces
         Task<Product> CreateAsync(Product product);
         Task<Product?> GetByIdAsync(Guid id);
         Task<IEnumerable<Product>> GetAllAsync(int pageNumber, int pageSize);
-       Task<Product?> UpdateAsync(Product product);  
-        Task<bool> DeleteAsync(Guid id); 
+        Task<Product?> UpdateAsync(Product product);
+        Task<bool> DeleteAsync(Guid id);
+
+        Task<bool> RestoreAsync(Guid id);
     }
 }

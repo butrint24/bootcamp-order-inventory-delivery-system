@@ -15,7 +15,7 @@ namespace Application.Services.Implementations
         {
             _repo = repo;
         }
-        
+
         public async Task<Product> CreateAsync(Product product)
         {
             if (product == null)
@@ -53,10 +53,8 @@ namespace Application.Services.Implementations
         {
             var products = await _repo.GetAllAsync(pageNumber, pageSize);
 
-            if (products == null)
-                throw new InvalidOperationException();
+            return products ?? Enumerable.Empty<Product>();
 
-            return products;
         }
         public async Task<Product?> UpdateAsync(Product product)
         {
@@ -90,13 +88,18 @@ namespace Application.Services.Implementations
         }
         public async Task<bool> DeleteAsync(Guid id)
         {
-            var product = await _repo.GetByIdAsync(id);
-            if (product == null)
-                return false;
+            var deleted = await _repo.SoftDeleteAsync(id);
+            if (deleted) await _repo.SaveChangesAsync();
+            return deleted;
+        }
 
-            _repo.Remove(product);
-            await _repo.SaveChangesAsync();
-            return true;
+
+        public async Task<bool> RestoreAsync(Guid id)
+        {
+            var restored = await _repo.RestoreAsync(id);
+            if (restored) await _repo.SaveChangesAsync();
+            return restored;
+
         }
     }
 }

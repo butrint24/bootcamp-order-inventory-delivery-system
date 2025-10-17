@@ -75,5 +75,5 @@ CREATE TABLE product (
   origin TEXT,
   category TEXT NOT NULL DEFAULT 'OTHER',
   price NUMERIC(12,2),
-  IsActive BOOLEAN DEFAULT TRUE
+  is_active BOOLEAN DEFAULT TRUE
 );

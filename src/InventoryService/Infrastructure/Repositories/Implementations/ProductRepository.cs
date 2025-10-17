@@ -28,7 +28,8 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
         public async Task<IEnumerable<Product>> GetAllAsync(int pageNumber, int pageSize)
         {
             return await _context.Products
-                .OrderBy(p => p.Name) 
+                .Where(p => p.IsActive)
+                .OrderBy(p => p.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -53,6 +54,28 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
         {
             return await _context.Products
                 .AnyAsync(p => p.Name.ToLower() == name.ToLower() && p.Origin.ToLower() == origin.ToLower());
+        }
+
+        public async Task<bool> SoftDeleteAsync(Guid id)
+        {
+            var product = await GetByIdAsync(id);
+            if (product == null || !product.IsActive)
+                return false;
+
+            product.IsActive = false;
+            _context.Products.Update(product);
+            return true;
+        }
+
+        public async Task<bool> RestoreAsync(Guid id)
+        {
+            var product = await GetByIdAsync(id);
+            if (product == null || product.IsActive)
+                return false;
+
+            product.IsActive = true;
+            _context.Products.Update(product);
+            return true;
         }
 
     }

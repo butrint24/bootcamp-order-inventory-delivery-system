@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Shared.Entities;
 
 namespace InventoryService.Infrastructure.Repositories.Interfaces
@@ -10,7 +11,12 @@ namespace InventoryService.Infrastructure.Repositories.Interfaces
         void Update(Product product);
         void Remove(Product product);
         Task<int> SaveChangesAsync();
-        
+
         Task<bool> ExistsAsync(string name, string origin);
+
+        Task<bool> SoftDeleteAsync(Guid id);
+
+        Task<bool> RestoreAsync(Guid id);
+
     }
 }
