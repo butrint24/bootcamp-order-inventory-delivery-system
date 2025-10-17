@@ -68,20 +68,12 @@ CREATE DATABASE inventory_db;
 \c inventory_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TYPE product_category AS ENUM (
-  'ELECTRONICS',
-  'CLOTHING',
-  'HEALTH_AND_BEAUTY',
-  'ACCESSORIES',
-  'FURNITURE',
-  'ENTERTAINMENT'
-);
-
 CREATE TABLE product (
   product_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   stock INT DEFAULT 0,
   origin TEXT,
-  category product_category,
-  price NUMERIC(12,2)
+  category TEXT NOT NULL DEFAULT 'OTHER',
+  price NUMERIC(12,2),
+  is_active BOOLEAN DEFAULT TRUE
 );
