@@ -2,23 +2,21 @@ CREATE DATABASE user_db;
 \c user_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TYPE role_type AS ENUM (
-  'USER',
-  'ADMIN'
-);
-
 CREATE TABLE "user" (
   user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(50),
-  surname VARCHAR(50),
+  name VARCHAR(50) NOT NULL,
+  surname VARCHAR(50) NOT NULL,
   date_of_birth DATE,
-  tel VARCHAR(50),
-  address TEXT,
-  role role_type
+  tel VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  address TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  role VARCHAR(20) DEFAULT 'User'
 );
 
 
-CREATE DATABASE order_db;
+CREATE DATABASE order_db;Loading...
+
 \c order_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
