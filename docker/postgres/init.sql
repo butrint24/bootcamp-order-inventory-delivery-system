@@ -14,7 +14,6 @@ CREATE TABLE "user" (
   role VARCHAR(20) DEFAULT 'User'
 );
 
-
 CREATE DATABASE order_db;
 
 \c order_db
