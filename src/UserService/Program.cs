@@ -26,6 +26,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, Application.Services.Implementations.UserService>();
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<UserProfile>());
 
+builder.WebHost.UseUrls("http://localhost:7003");
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -35,5 +37,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+
+app.MapGet("/User/hello", () =>
+{
+    var port = app.Urls.FirstOrDefault()?.Split(':').Last() ?? "unknown";
+    return $"Hello from {port}";
+});
 
 app.Run();

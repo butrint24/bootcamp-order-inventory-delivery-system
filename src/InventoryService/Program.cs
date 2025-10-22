@@ -26,6 +26,7 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
+builder.WebHost.UseUrls("http://localhost:7001");
 
 var app = builder.Build();
 
@@ -37,5 +38,10 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
+app.MapGet("/Product/hello", () =>
+{
+    var port = app.Urls.FirstOrDefault()?.Split(':').Last() ?? "unknown";
+    return $"Hello from {port}";
+});
 
 app.Run();
