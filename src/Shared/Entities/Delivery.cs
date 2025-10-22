@@ -13,6 +13,10 @@ namespace Shared.Entities
 
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
+        public Guid OrderId { get; private set; 
+        }
+        public Guid UserId { get; private set; }
+
         private Delivery() { }
 
         public Delivery(Guid orderId, Guid userId, DateTime? eta = null)
