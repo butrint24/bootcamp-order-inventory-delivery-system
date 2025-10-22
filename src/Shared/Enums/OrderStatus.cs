@@ -6,6 +6,7 @@ namespace Shared.Enums
         Processing,
         Cancelled,
         Completed,
-        Confirmed
+        Confirmed,
+        Other
     }
 }

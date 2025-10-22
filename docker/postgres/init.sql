@@ -14,8 +14,7 @@ CREATE TABLE "user" (
   role VARCHAR(20) DEFAULT 'User'
 );
 
-
-CREATE DATABASE order_db;Loading...
+CREATE DATABASE order_db;
 
 \c order_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
