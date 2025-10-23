@@ -9,6 +9,7 @@ namespace UserService.Infrastructure.Data
             : base(options) { }
 
         public DbSet<User> Users => Set<User>();
+        public DbSet<UserAuth> UserAuths => Set<UserAuth>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,11 +29,37 @@ namespace UserService.Infrastructure.Data
                 entity.Property(e => e.Address).HasColumnName("address");
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
                 entity.Property(e => e.Role)
-                    .HasColumnName("role")
-                    .HasConversion<string>()
-                    .HasMaxLength(20);
+                      .HasColumnName("role")
+                      .HasConversion<string>()
+                      .HasMaxLength(20);
+            });
+
+            modelBuilder.Entity<UserAuth>(entity =>
+            {
+                entity.ToTable("user_auth");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                      .HasColumnName("id")
+
+                entity.Property(e => e.UserId)
+                      .HasColumnName("user_id")
+
+                entity.Property(e => e.PasswordHash)
+                      .HasColumnName("password_hash")
+
+                entity.Property(e => e.RefreshToken)
+                      .HasColumnName("refresh_token");
+
+                entity.Property(e => e.RefreshTokenExpiryTime)
+                      .HasColumnName("refresh_token_expiry_time");
+
+                entity.HasOne<User>()
+                      .WithMany()
+                      .HasForeignKey(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
         }
-
     }
 }
