@@ -22,7 +22,7 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
 );
 
 builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
-builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService.Application.Services.Implementations.DeliveryService>();
 builder.Services.AddAutoMapper(typeof(DeliveryProfile).Assembly);
 
 var app = builder.Build();
@@ -36,7 +36,3 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 app.Run();
-
-internal class DeliveryDbContext
-{
-}

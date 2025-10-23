@@ -1,4 +1,4 @@
-using Application.DTOs;
+using Shared.DTOs;
 using DeliveryService.Application.Services.Interfaces;
 using AutoMapper;
 using DeliveryService.Infrastructure.Repositories.Interfaces;

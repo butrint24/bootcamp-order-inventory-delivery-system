@@ -1,5 +1,5 @@
 using AutoMapper;
-using Application.DTOs;
+using Shared.DTOs;
 using Shared.Entities;
 using System;
 

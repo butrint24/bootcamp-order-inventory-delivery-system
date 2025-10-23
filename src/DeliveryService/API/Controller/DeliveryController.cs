@@ -1,5 +1,5 @@
 using Shared.DTOs;
-using Application.Services.Interfaces;
+using DeliveryService.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;

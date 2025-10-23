@@ -15,6 +15,10 @@ namespace Shared.Entities
 
         public bool IsActive { get; set; } = true;
 
+        public Guid OrderId { get; set; }
+        
+        public Guid UserId { get; set; }
+
         private Delivery() { }
 
         public Delivery( DateTime? eta = null)

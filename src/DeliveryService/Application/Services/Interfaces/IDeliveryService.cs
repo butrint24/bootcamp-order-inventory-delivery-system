@@ -1,4 +1,4 @@
-using Application.DTOs;
+using Shared.DTOs;
 using Shared.Entities;
 using System;
 using System.Collections.Generic;

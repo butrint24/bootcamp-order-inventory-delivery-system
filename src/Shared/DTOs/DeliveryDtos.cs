@@ -1,8 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Shared.Enums; 
 
 
-namespace Application.DTOs
+namespace Shared.DTOs
 {
 
     public class DeliveryCreateDto
@@ -20,7 +21,7 @@ namespace Application.DTOs
     {
         public DeliveryStatus? Status { get; set; }
 
-        public DateTime? Eta { get; set; } = string.Empty();
+        public DateTime? Eta { get; set; } = null;
     }
 
     public class DeliveryResponseDto
