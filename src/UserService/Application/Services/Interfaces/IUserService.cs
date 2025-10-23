@@ -14,5 +14,9 @@ namespace Application.Services.Interfaces
         Task<UserResponseDto?> UpdateAsync(Guid id, UserUpdateDto dto);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> RestoreAsync(Guid id);
+
+        // Task<UserAuthResponseDto> SignupAsync(UserSignupDto dto);
+        // Task<UserAuthResponseDto> LoginAsync(UserLoginDto dto);
+        // Task<UserAuthResponseDto?> RefreshTokenAsync(string refreshToken);
     }
 }

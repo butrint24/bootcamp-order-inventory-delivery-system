@@ -1,14 +1,14 @@
+using Shared.Entities;
+using UserService.Infrastructure.Data;
+using UserService.Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace UserService.Infrastructure.Repositories.Implementations
 {
-    using Shared.Entities;
-    using UserService.Infrastructure.Data;
-    using UserService.Infrastructure.Repositories.Interfaces;
-    using Microsoft.EntityFrameworkCore;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
     public class UserRepository : IUserRepository
     {
         private readonly UserDbContext _context;
@@ -76,6 +76,28 @@ namespace UserService.Infrastructure.Repositories.Implementations
 
             user.Activate();
             return true;
+        }
+
+        public async Task AddAuthAsync(UserAuth auth)
+        {
+            await _context.UserAuths.AddAsync(auth);
+        }
+
+        public async Task<UserAuth?> GetAuthByUserIdAsync(Guid userId)
+        {
+            return await _context.UserAuths
+                                 .FirstOrDefaultAsync(a => a.UserId == userId);
+        }
+
+        public async Task<UserAuth?> GetAuthByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.UserAuths
+                                 .FirstOrDefaultAsync(a => a.RefreshToken == refreshToken);
+        }
+
+        public void UpdateAuth(UserAuth auth)
+        {
+            _context.UserAuths.Update(auth);
         }
     }
 }
