@@ -13,10 +13,4 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("Delivery/hello", () =>
-{
-    var port = app.Urls.FirstOrDefault()?.Split(':').Last() ?? "unknown";
-    return $"Hello from {port}";
-});
-
 app.Run();

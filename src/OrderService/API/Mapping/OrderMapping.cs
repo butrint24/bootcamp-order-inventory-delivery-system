@@ -48,7 +48,7 @@ namespace API.Mapping
             if (Enum.TryParse<OrderStatus>(statusString ?? string.Empty, true, out var status))
                 return status;
 
-            return OrderStatus.Other;
+            return OrderStatus.PENDING;
         }
     }
 }
