@@ -13,12 +13,12 @@ namespace Shared.Entities
 
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
+        public bool IsActive { get; set; } = true;
+
         private Delivery() { }
 
-        public Delivery(Guid orderId, Guid userId, DateTime? eta = null)
+        public Delivery( DateTime? eta = null)
         {
-            OrderId = orderId;
-            UserId = userId;
             Eta = eta;
             Status = DeliveryStatus.Pending;
             CreatedAt = DateTime.UtcNow;
