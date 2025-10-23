@@ -79,7 +79,7 @@ namespace UserService.API.Controllers
             return success ? NoContent() : NotFound($"User with ID {id} not found.");
         }
 
-        [HttpPatch("{id:guid}/activate")]
+        [HttpPatch("restore/{id:guid}")]
         public async Task<IActionResult> Activate(Guid id)
         {
             if (id == Guid.Empty)

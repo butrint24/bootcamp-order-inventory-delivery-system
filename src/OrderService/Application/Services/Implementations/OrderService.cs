@@ -26,7 +26,7 @@ namespace Application.Services.Implementations
 
             if (!Enum.IsDefined(typeof(OrderStatus), order.Status))
             {
-                order.Status = OrderStatus.Other;
+                order.Status = OrderStatus.PENDING; 
             }
 
             await _repo.AddAsync(order);

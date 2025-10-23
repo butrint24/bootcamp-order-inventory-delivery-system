@@ -19,21 +19,17 @@ CREATE DATABASE order_db;
 \c order_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TYPE order_status AS ENUM (
-  'PENDING',
-  'PROCESSING',
-  'CANCELLED',
-  'COMPLETED',
-  'CONFIRMED'
-  );
-
 CREATE TABLE "order" (
   order_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   price NUMERIC(12,2),
-  status order_status,
+  status VARCHAR(20) DEFAULT 'PENDING',
   address TEXT,
-  user_id UUID
+  user_id UUID,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP,
+  is_deleted BOOLEAN DEFAULT FALSE
 );
+
 
 CREATE TABLE order_item (
   order_item_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

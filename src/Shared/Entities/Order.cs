@@ -10,7 +10,7 @@ namespace Shared.Entities
         public Guid UserId { get; set; }
         public string Address { get; set; } = null!;
         public decimal Price { get; set; }
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public OrderStatus Status { get; set; } = OrderStatus.PENDING;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
 

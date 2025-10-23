@@ -13,14 +13,17 @@ namespace OrderService.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<OrderItem>(entity =>
+            modelBuilder.Entity<Order>(entity =>
             {
-                entity.ToTable("order_item");
-                entity.Property(e => e.OrderItemId).HasColumnName("order_item_id");
+                entity.ToTable("order"); 
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
-                entity.Property(e => e.ProductId).HasColumnName("product_id");
-                entity.Property(e => e.Quantity).HasColumnName("quantity");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Address).HasColumnName("address");
+                entity.Property(e => e.Price).HasColumnName("price");
+                entity.Property(e => e.Status).HasColumnName("status");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+                entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
             });
 
             modelBuilder.Entity<OrderItem>(entity =>

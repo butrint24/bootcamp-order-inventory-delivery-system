@@ -29,10 +29,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-app.MapGet("/Order/hello", () =>
-{
-    var port = app.Urls.FirstOrDefault()?.Split(':').Last() ?? "unknown";
-    return $"Hello from {port}";
-});
 
 app.Run();
