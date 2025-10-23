@@ -15,15 +15,38 @@ namespace DeliveryService.Infrastructure.Data
             modelBuilder.Entity<Delivery>(entity =>
             {
                 entity.ToTable("delivery");
+
+                entity.HasKey(e => e.DeliveryId);
                 entity.Property(e => e.DeliveryId).HasColumnName("delivery_id");
-                entity.Property(e => e.Status).HasColumnName("status").HasConversion<string>();
-                entity.Property(e => e.Eta).HasColumnName("eta");
-                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+
+                
+                entity.Property(e => e.Status)
+                      .HasColumnName("status")
+                      .HasMaxLength(20)
+                      .HasDefaultValue("PENDING");
+
+                
+                entity.Property(e => e.Eta)
+                      .HasColumnName("eta")
+                      .HasConversion(
+                          v => v, 
+                          v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : null
+                      );
+
+                entity.Property(e => e.CreatedAt)
+                      .HasColumnName("created_at")
+                      .HasConversion(
+                          v => DateTime.SpecifyKind(v, DateTimeKind.Utc),
+                          v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                      );
+
+                entity.Property(e => e.IsActive)
+                      .HasColumnName("is_active")
+                      .HasDefaultValue(true);
+
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
                 entity.Property(e => e.UserId).HasColumnName("user_id");
             });
-
         }
     }
 }

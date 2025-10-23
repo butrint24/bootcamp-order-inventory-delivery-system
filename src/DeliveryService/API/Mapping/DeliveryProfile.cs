@@ -20,7 +20,8 @@ namespace DeliveryService.API.Mapping
                 .ForMember(d => d.IsActive, opt => opt.Ignore());
 
             CreateMap<Delivery, DeliveryResponseDto>()
-                .ForMember(d => d.Status, opt => opt.MapFrom(s => s.Status.ToString()));
+            ;
+            
         }
     }
 }

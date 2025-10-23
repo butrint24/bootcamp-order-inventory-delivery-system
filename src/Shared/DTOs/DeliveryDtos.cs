@@ -15,6 +15,7 @@ namespace Shared.DTOs
         public Guid UserId { get; set; }
 
         public DateTime? Eta { get; set; }
+        public DeliveryStatus? Status { get; set; }
     }
 
     public class DeliveryUpdateDto

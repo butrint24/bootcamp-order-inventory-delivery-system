@@ -50,15 +50,10 @@
  \c delivery_db
  CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
- CREATE TYPE delivery_status AS ENUM (
-   'PENDING',
-   'PROCESSING',
-   'DELIVERED'
-   );
-
+ 
  CREATE TABLE delivery (
    delivery_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-   status delivery_status,
+   status VARCHAR(20) DEFAULT 'PENDING',
    eta TIMESTAMP,
    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    is_active BOOLEAN DEFAULT TRUE,

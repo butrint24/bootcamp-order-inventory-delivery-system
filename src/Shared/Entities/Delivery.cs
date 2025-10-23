@@ -1,5 +1,4 @@
 using System;
-using Shared.Enums;
 
 namespace Shared.Entities
 {
@@ -7,41 +6,51 @@ namespace Shared.Entities
     {
         public Guid DeliveryId { get; private set; } = Guid.NewGuid();
 
-        public DeliveryStatus Status { get; private set; } = DeliveryStatus.Pending;
+        
+        public string Status { get; private set; } = "PENDING";
 
-        public DateTime? Eta { get; private set; }
+        private DateTime? _eta;
+        public DateTime? Eta
+        {
+            get => _eta;
+            set => _eta = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
+        }
 
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        private DateTime _createdAt = DateTime.UtcNow;
+        public DateTime CreatedAt
+        {
+            get => _createdAt;
+            set => _createdAt = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        }
 
         public bool IsActive { get; set; } = true;
-
         public Guid OrderId { get; set; }
-        
         public Guid UserId { get; set; }
 
         private Delivery() { }
 
-        public Delivery( DateTime? eta = null)
+        public Delivery(Guid orderId, Guid userId, DateTime? eta = null)
         {
+            OrderId = orderId;
+            UserId = userId;
             Eta = eta;
-            Status = DeliveryStatus.Pending;
+            Status = "PENDING";
             CreatedAt = DateTime.UtcNow;
+            IsActive = true;
         }
 
         public void MarkProcessing()
         {
-            if (Status != DeliveryStatus.Pending)
+            if (Status != "PENDING")
                 throw new InvalidOperationException("Delivery can only be processed from pending state.");
-
-            Status = DeliveryStatus.Processing;
+            Status = "PROCESSING";
         }
 
         public void MarkDelivered()
         {
-            if (Status != DeliveryStatus.Processing)
+            if (Status != "PROCESSING")
                 throw new InvalidOperationException("Delivery must be in processing state before being delivered.");
-
-            Status = DeliveryStatus.Delivered;
+            Status = "DELIVERED";
         }
 
         public void UpdateEta(DateTime newEta)
@@ -49,7 +58,7 @@ namespace Shared.Entities
             if (newEta < DateTime.UtcNow)
                 throw new InvalidOperationException("ETA cannot be in the past.");
 
-            Eta = newEta;
+            Eta = DateTime.SpecifyKind(newEta, DateTimeKind.Utc);
         }
     }
 }
