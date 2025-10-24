@@ -3,6 +3,8 @@ using Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Shared.Attributes;
+using Shared.Enums;
 
 namespace UserService.API.Controllers
 {
@@ -18,6 +20,7 @@ namespace UserService.API.Controllers
         }
 
         [HttpPost]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
         {
             // if (!ModelState.IsValid)
@@ -54,6 +57,7 @@ namespace UserService.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateDto dto)
         {
             if (id == Guid.Empty)
@@ -70,6 +74,7 @@ namespace UserService.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Deactivate(Guid id)
         {
             if (id == Guid.Empty)
@@ -80,6 +85,7 @@ namespace UserService.API.Controllers
         }
 
         [HttpPatch("restore/{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Activate(Guid id)
         {
             if (id == Guid.Empty)
