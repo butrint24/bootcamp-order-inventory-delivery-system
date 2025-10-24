@@ -1,7 +1,11 @@
 using Shared.Entities;
-    using InventoryService.Infrastructure.Data;
-    using InventoryService.Infrastructure.Repositories.Interfaces;
-    using Microsoft.EntityFrameworkCore;
+using InventoryService.Infrastructure.Data;
+using InventoryService.Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace InventoryService.Infrastructure.Repositories.Implementations
 {
@@ -24,14 +28,33 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
             return await _context.Products.FindAsync(id);
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Product>> SearchAndSortAsync(
+            string? searchTerm,
+            string? sortBy,
+            bool ascending = true,
+            int pageNumber = 1,
+            int pageSize = 10)
         {
-            return await _context.Products
-                .Where(p => p.IsActive)
-                .OrderBy(p => p.Name)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var query = _context.Products.AsQueryable().Where(p => p.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(searchTerm) ||
+                    p.Origin.ToLower().Contains(searchTerm));
+            }
+
+            query = sortBy?.ToLower() switch
+            {
+                "name" => ascending ? query.OrderBy(p => p.Name) : query.OrderByDescending(p => p.Name),
+                "origin" => ascending ? query.OrderBy(p => p.Origin) : query.OrderByDescending(p => p.Origin),
+                "price" => ascending ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price),
+                "stock" => ascending ? query.OrderBy(p => p.Stock) : query.OrderByDescending(p => p.Stock),
+                _ => query.OrderBy(p => p.Name) // default
+            };
+
+            return await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
         public void Update(Product product)
@@ -62,7 +85,7 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
             var product = await GetByIdAsync(id);
             if (product == null || !product.IsActive) return false;
 
-            product.Deactivate(); 
+            product.Deactivate();
             return true;
         }
 

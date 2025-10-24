@@ -1,5 +1,7 @@
-using System.Runtime.CompilerServices;
 using Shared.Entities;
+using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 
 namespace InventoryService.Infrastructure.Repositories.Interfaces
 {
@@ -7,16 +9,20 @@ namespace InventoryService.Infrastructure.Repositories.Interfaces
     {
         Task AddAsync(Product product);
         Task<Product?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Product>> GetAllAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<Product>> SearchAndSortAsync(
+            string? searchTerm,
+            string? sortBy,
+            bool ascending = true,
+            int pageNumber = 1,
+            int pageSize = 10
+        );
+
         void Update(Product product);
         void Remove(Product product);
         Task<int> SaveChangesAsync();
 
         Task<bool> ExistsAsync(string name, string origin, Guid? excludeProductId = null);
-
         Task<bool> SoftDeleteAsync(Guid id);
-
         Task<bool> RestoreAsync(Guid id);
-
     }
 }

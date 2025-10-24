@@ -20,9 +20,6 @@ namespace InventoryService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
-            // if (!ModelState.IsValid)
-            //     return BadRequest(ModelState);
-
             var result = await _service.CreateProductAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = result.ProductId }, result);
         }
@@ -30,41 +27,36 @@ namespace InventoryService.API.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            if (id == Guid.Empty)
-                return BadRequest("Invalid product ID.");
+            if (id == Guid.Empty) return BadRequest("Invalid product ID.");
 
             var product = await _service.GetByIdAsync(id);
-            if (product == null)
-                return NotFound();
+            if (product == null) return NotFound();
 
             return Ok(product);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortBy,
+            [FromQuery] bool ascending = true,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            if (pageNumber <= 0)
-                return BadRequest("Invalid page number.");
+            if (pageNumber <= 0) return BadRequest("Invalid page number.");
+            if (pageSize <= 0 || pageSize > 100) return BadRequest("Invalid page size.");
 
-            if (pageSize <= 0 || pageSize > 100)
-                return BadRequest("Invalid page size.");
-
-            var products = await _service.GetAllAsync(pageNumber, pageSize);
+            var products = await _service.GetAllAsync(searchTerm, sortBy, ascending, pageNumber, pageSize);
             return Ok(products);
         }
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
-            if (id == Guid.Empty)
-                return BadRequest("Invalid product ID.");
-
-            // if (!ModelState.IsValid)
-            //     return BadRequest(ModelState);
+            if (id == Guid.Empty) return BadRequest("Invalid product ID.");
 
             var updatedProduct = await _service.UpdateProductAsync(id, dto);
-            if (updatedProduct == null)
-                return NotFound($"No product found with ID {id}.");
+            if (updatedProduct == null) return NotFound($"No product found with ID {id}.");
 
             return Ok(updatedProduct);
         }
@@ -72,8 +64,7 @@ namespace InventoryService.API.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            if (id == Guid.Empty)
-                return BadRequest("Invalid product ID.");
+            if (id == Guid.Empty) return BadRequest("Invalid product ID.");
 
             var ok = await _service.DeleteAsync(id);
             return ok ? NoContent() : NotFound();
