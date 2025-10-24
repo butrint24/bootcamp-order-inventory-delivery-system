@@ -14,8 +14,15 @@ CREATE TABLE "user" (
   role VARCHAR(20) DEFAULT 'User'
 );
 
-CREATE DATABASE order_db;
+CREATE TABLE user_auth (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    password_hash TEXT NOT NULL,
+    refresh_token TEXT,
+    refresh_token_expiry_time TIMESTAMP
+);
 
+CREATE DATABASE order_db;
 \c order_db
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 

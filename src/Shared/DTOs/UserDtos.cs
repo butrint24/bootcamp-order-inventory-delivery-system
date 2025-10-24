@@ -55,4 +55,55 @@ namespace Shared.DTOs
         public bool IsActive { get; set; }
         public RoleType Role { get; set; }
     }
+
+    public class SignupRequestDto
+    {
+        [Required, MaxLength(100)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required, MaxLength(100)]
+        public string Surname { get; set; } = string.Empty;
+
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required, MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+
+        [Phone]
+        public string? Tel { get; set; }
+
+        public DateOnly? DateOfBirth { get; set; }
+        public string? Address { get; set; }
+
+        public RoleType Role { get; set; } = RoleType.User;
+    }
+
+    public class LoginRequestDto
+    {
+        [Required, EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required, MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class TokenResponseDto
+    {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime ExpiresAt { get; set; }
+    }
+
+    public class RefreshRequestDto
+    {
+        [Required]
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class AuthResponseDto
+    {
+        public UserResponseDto User { get; set; } = new();
+        public TokenResponseDto Tokens { get; set; } = new();
+    }
 }

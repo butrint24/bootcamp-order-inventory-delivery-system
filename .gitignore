@@ -57,3 +57,5 @@ nunit-*.xml
 *.user
 bin/
 obj/
+
+appsettings.Secrets.json

@@ -3,6 +3,8 @@ using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Shared.Enums;
+using Shared.Attributes;
 
 namespace InventoryService.API.Controllers
 {
@@ -18,6 +20,7 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpPost]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
         {
             // if (!ModelState.IsValid)
@@ -54,6 +57,7 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
         {
             if (id == Guid.Empty)
@@ -70,6 +74,7 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Delete(Guid id)
         {
             if (id == Guid.Empty)
@@ -80,6 +85,7 @@ namespace InventoryService.API.Controllers
         }
 
         [HttpPatch("restore/{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> Restore(Guid id)
         {
             if (id == Guid.Empty)

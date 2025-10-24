@@ -3,6 +3,8 @@ using Application.Services.Interfaces;
 using Shared.DTOs.Order;
 using System;
 using System.Threading.Tasks;
+using Shared.Attributes;
+using Shared.Enums;
 
 namespace API.Controllers
 {
@@ -18,6 +20,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
             var order = await _service.CreateOrderAsync(dto);
@@ -25,6 +28,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] OrderDto dto)
         {
             if (id == Guid.Empty)
@@ -59,6 +63,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             if (id == Guid.Empty)
