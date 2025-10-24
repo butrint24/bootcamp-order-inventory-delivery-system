@@ -29,6 +29,7 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
 builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService.Application.Services.Implementations.DeliveryService>();
 builder.Services.AddAutoMapper(typeof(DeliveryProfile).Assembly);
+builder.WebHost.UseUrls("http://localhost:7004");
 
 var app = builder.Build();
 
