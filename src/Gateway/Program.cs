@@ -32,13 +32,12 @@ if (app.Environment.IsDevelopment())
 
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/swagger") ||
-    context.Request.Path.Equals("/api/auth/signup", StringComparison.OrdinalIgnoreCase) ||
-    context.Request.Path.Equals("/api/auth/login", StringComparison.OrdinalIgnoreCase))
-       {
-       await next();
-       return;
-       }
+    if (context.Request.Path.StartsWithSegments("/api/auth", StringComparison.OrdinalIgnoreCase))
+    {
+        await next();
+        return;
+    }
+
 
     var jwtHelper = context.RequestServices.GetRequiredService<JwtHelper>();
     var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
