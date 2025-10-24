@@ -22,5 +22,7 @@ namespace UserService.Infrastructure.Repositories.Interfaces
         Task<UserAuth?> GetAuthByUserIdAsync(Guid userId);
         Task<UserAuth?> GetAuthByRefreshTokenAsync(string refreshToken);
         void UpdateAuth(UserAuth auth);
+        Task<User?> GetByEmailAsync(string email);
+
     }
 }   

@@ -40,14 +40,14 @@ namespace UserService.Infrastructure.Data
 
                 entity.HasKey(e => e.Id);
 
-                entity.Property(e => e.Id)
-                      .HasColumnName("id")
+                  entity.Property(e => e.Id)
+                        .HasColumnName("id");
 
-                entity.Property(e => e.UserId)
-                      .HasColumnName("user_id")
+                  entity.Property(e => e.UserId)
+                        .HasColumnName("user_id");
 
                 entity.Property(e => e.PasswordHash)
-                      .HasColumnName("password_hash")
+                      .HasColumnName("password_hash");
 
                 entity.Property(e => e.RefreshToken)
                       .HasColumnName("refresh_token");

@@ -1,76 +1,94 @@
-public class JwtHelper
+using System;
+using System.Linq;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+
+namespace Shared.Helpers
 {
-    private readonly IConfiguration _config;
-
-    public JwtHelper(IConfiguration config)
+    public class JwtHelper
     {
-        _config = config;
-    }
+        private readonly IConfiguration _config;
 
-    public string CreateToken(int userId, string role)
-    {
-        var claims = new[]
+        public JwtHelper(IConfiguration config)
         {
-            new Claim("userId", userId.ToString()),
-            new Claim(ClaimTypes.Role, role)
-        };
+            _config = config;
+        }
 
-        var tokenKeyString = _config["AppSettings:TokenKey"] 
-                             ?? throw new Exception("TokenKey is not set");
-
-        var tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
-
-        var credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha512Signature);
-
-        var descriptor = new SecurityTokenDescriptor
+        public string CreateToken(Guid userId, string role)
         {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(
-                int.Parse(_config["AppSettings:AccessTokenExpiryMinutes"] ?? "15")
-            ),
-            SigningCredentials = credentials,
-            Issuer = _config["AppSettings:Issuer"],
-            Audience = _config["AppSettings:Audience"]
-        };
-
-        return new JwtSecurityTokenHandler().WriteToken(
-            new JwtSecurityTokenHandler().CreateToken(descriptor)
-        );
-    }
-
-    public ClaimsPrincipal? ValidateToken(string token)
-    {
-        var tokenKeyString = _config["AppSettings:TokenKey"] 
-                             ?? throw new Exception("TokenKey is not set");
-
-        var tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
-
-        try
-        {
-            return new JwtSecurityTokenHandler().ValidateToken(token, new TokenValidationParameters
+            var claims = new[]
             {
-                ValidateIssuer = true,
-                ValidIssuer = _config["AppSettings:Issuer"],
-                ValidateAudience = true,
-                ValidAudience = _config["AppSettings:Audience"],
-                ValidateLifetime = true,
-                IssuerSigningKey = tokenKey,
-                ValidateIssuerSigningKey = true
-            }, out _);
-        }
-        catch
-        {
-            return null;
-        }
-    }
+                new Claim("userId", userId.ToString()),
+                new Claim(ClaimTypes.Role, role)
+            };
 
-    public string GenerateRefreshToken()
-    {
-        var randomBytes = new byte[64];
-        using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
-        {
-            rng.GetBytes(randomBytes);
+            var tokenKeyString = _config["AppSettings:TokenKey"]
+                                ?? throw new Exception("TokenKey is not set");
+
+            var tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
+            var credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha512Signature);
+
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(
+                    int.Parse(_config["AppSettings:AccessTokenExpiryMinutes"] ?? "15")
+                ),
+                SigningCredentials = credentials,
+                Issuer = _config["AppSettings:Issuer"],
+                Audience = _config["AppSettings:Audience"]
+            };
+
+            return new JwtSecurityTokenHandler().WriteToken(
+                new JwtSecurityTokenHandler().CreateToken(descriptor)
+            );
         }
-        return Convert.ToBase64String(randomBytes);
+
+        public ClaimsPrincipal? ValidateToken(string token)
+        {
+            var tokenKeyString = _config["AppSettings:TokenKey"]
+                                ?? throw new Exception("TokenKey is not set");
+
+            var tokenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKeyString));
+
+            try
+            {
+                return new JwtSecurityTokenHandler().ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = _config["AppSettings:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = _config["AppSettings:Audience"],
+                    ValidateLifetime = true,
+                    IssuerSigningKey = tokenKey,
+                    ValidateIssuerSigningKey = true
+                }, out _);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public int GetRefreshTokenExpiryDays()
+        {
+            return int.Parse(_config["AppSettings:RefreshTokenExpiryDays"] ?? "7");
+        }
+
+        public int GetAccessTokenExpiryMinutes()
+        {
+            return int.Parse(_config["AppSettings:AccessTokenExpiryMinutes"] ?? "15");
+        }
+
     }
 }

@@ -5,7 +5,7 @@ namespace Shared.Entities
         public Guid Id { get; private set; } = Guid.NewGuid();
         public Guid UserId { get; private set; }
         public string PasswordHash { get; private set; } = null!;
-        public string? RefreshToken  { get; private set; };
+        public string? RefreshToken  { get; private set; }
         public DateTime? RefreshTokenExpiryTime { get; private set; }
 
 
