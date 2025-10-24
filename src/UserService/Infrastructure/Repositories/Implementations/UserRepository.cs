@@ -99,5 +99,11 @@ namespace UserService.Infrastructure.Repositories.Implementations
         {
             _context.UserAuths.Update(auth);
         }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
     }
 }
