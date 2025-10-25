@@ -28,21 +28,47 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
             return await _context.Products.FindAsync(id);
         }
 
-        public async Task<IEnumerable<Product>> SearchAndSortAsync(
+        public async Task<IEnumerable<Product>> SearchSortAndFilterAsync(
             string? searchTerm,
             string? sortBy,
             bool ascending = true,
             int pageNumber = 1,
-            int pageSize = 10)
+            int pageSize = 10,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? category = null,
+            bool? inStock = null)
         {
-            var query = _context.Products.AsQueryable().Where(p => p.IsActive);
+            var query = _context.Products
+                .AsQueryable()
+                .Where(p => p.IsActive);
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                searchTerm = searchTerm.ToLower();
+                var term = searchTerm.ToLower();
                 query = query.Where(p =>
-                    p.Name.ToLower().Contains(searchTerm) ||
-                    p.Origin.ToLower().Contains(searchTerm));
+                    p.Name.ToLower().Contains(term) ||
+                    p.Origin.ToLower().Contains(term) ||
+                    p.Category.ToString().ToLower().Contains(term));
+            }
+
+            if (minPrice.HasValue)
+                query = query.Where(p => p.Price >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                query = query.Where(p => p.Price <= maxPrice.Value);
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var categoryLower = category.ToLower();
+                query = query.Where(p => p.Category.ToString().ToLower() == categoryLower);
+            }
+
+            if (inStock.HasValue)
+            {
+                query = inStock.Value
+                    ? query.Where(p => p.Stock > 0)
+                    : query.Where(p => p.Stock <= 0);
             }
 
             query = sortBy?.ToLower() switch
@@ -51,10 +77,14 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
                 "origin" => ascending ? query.OrderBy(p => p.Origin) : query.OrderByDescending(p => p.Origin),
                 "price" => ascending ? query.OrderBy(p => p.Price) : query.OrderByDescending(p => p.Price),
                 "stock" => ascending ? query.OrderBy(p => p.Stock) : query.OrderByDescending(p => p.Stock),
-                _ => query.OrderBy(p => p.Name) // default
+                "category" => ascending ? query.OrderBy(p => p.Category) : query.OrderByDescending(p => p.Category),
+                _ => query.OrderBy(p => p.Name)
             };
 
-            return await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            return await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
         }
 
         public void Update(Product product)

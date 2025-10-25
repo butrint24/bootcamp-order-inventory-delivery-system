@@ -12,13 +12,16 @@ namespace Application.Services.Interfaces
         Task<ProductResponseDto?> UpdateProductAsync(Guid id, ProductUpdateDto dto);
         Task<ProductResponseDto?> GetByIdAsync(Guid id);
 
-        // Unified listing with search, sort, pagination
         Task<IEnumerable<ProductResponseDto>> GetAllAsync(
             string? searchTerm = null,
             string? sortBy = null,
             bool ascending = true,
             int pageNumber = 1,
-            int pageSize = 10
+            int pageSize = 10,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? category = null,
+            bool? inStock = null
         );
 
         Task<bool> DeleteAsync(Guid id);

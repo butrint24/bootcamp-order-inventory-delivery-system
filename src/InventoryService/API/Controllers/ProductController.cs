@@ -41,12 +41,16 @@ namespace InventoryService.API.Controllers
             [FromQuery] string? sortBy,
             [FromQuery] bool ascending = true,
             [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] string? category = null,
+            [FromQuery] bool? inStock = null)
         {
             if (pageNumber <= 0) return BadRequest("Invalid page number.");
             if (pageSize <= 0 || pageSize > 100) return BadRequest("Invalid page size.");
 
-            var products = await _service.GetAllAsync(searchTerm, sortBy, ascending, pageNumber, pageSize);
+            var products = await _service.GetAllAsync(searchTerm, sortBy, ascending, pageNumber, pageSize, minPrice, maxPrice, category, inStock);
             return Ok(products);
         }
 

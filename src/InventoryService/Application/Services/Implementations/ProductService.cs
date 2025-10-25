@@ -45,9 +45,16 @@ namespace Application.Services.Implementations
             string? sortBy = null,
             bool ascending = true,
             int pageNumber = 1,
-            int pageSize = 10)
+            int pageSize = 10,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? category = null,
+            bool? inStock = null)
         {
-            var products = await _repo.SearchAndSortAsync(searchTerm, sortBy, ascending, pageNumber, pageSize);
+            var products = await _repo.SearchSortAndFilterAsync(
+                searchTerm, sortBy, ascending, pageNumber, pageSize, 
+                minPrice, maxPrice, category, inStock);
+
             return products?.Select(p => _mapper.Map<ProductResponseDto>(p)) ?? Enumerable.Empty<ProductResponseDto>();
         }
 

@@ -9,12 +9,17 @@ namespace InventoryService.Infrastructure.Repositories.Interfaces
     {
         Task AddAsync(Product product);
         Task<Product?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Product>> SearchAndSortAsync(
+
+        Task<IEnumerable<Product>> SearchSortAndFilterAsync(
             string? searchTerm,
             string? sortBy,
             bool ascending = true,
             int pageNumber = 1,
-            int pageSize = 10
+            int pageSize = 10,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string? category = null,
+            bool? inStock = null
         );
 
         void Update(Product product);
