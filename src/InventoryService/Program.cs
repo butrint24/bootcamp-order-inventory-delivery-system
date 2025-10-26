@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using InventoryService.API.Controllers.Mapping;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
@@ -21,7 +20,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ProductDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
