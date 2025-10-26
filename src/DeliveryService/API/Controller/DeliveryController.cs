@@ -1,0 +1,92 @@
+using Shared.DTOs;
+using DeliveryService.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+
+namespace DeliveryService.API.Controller
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DeliveryController : ControllerBase
+    {
+        private readonly IDeliveryService _service;
+
+        public DeliveryController(IDeliveryService service)
+        {
+            _service = service;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] DeliveryCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _service.CreateDeliveryAsync(dto);
+            return Created("", result);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid delivery ID.");
+
+            var delivery = await _service.GetByIdAsync(id);
+            if (delivery == null)
+                return NotFound();
+
+            return Ok(delivery);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            if (pageNumber <= 0)
+                return BadRequest("Invalid page number.");
+
+            if (pageSize <= 0 || pageSize > 100)
+                return BadRequest("Invalid page size.");
+
+            var deliveries = await _service.GetAllAsync(pageNumber, pageSize);
+            return Ok(deliveries);
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] DeliveryUpdateDto dto)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid delivery ID.");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updatedDelivery = await _service.UpdateDeliveryAsync(id, dto);
+            if (updatedDelivery == null)
+                return NotFound($"No delivery found with ID {id}.");
+
+            return Ok(updatedDelivery);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid delivery ID.");
+
+            var ok = await _service.DeleteAsync(id);
+            return ok ? NoContent() : NotFound();
+        }
+
+        [HttpPatch("restore/{id:guid}")]
+        public async Task<IActionResult> Restore(Guid id)
+        {
+            if (id == Guid.Empty)
+                return BadRequest("Invalid delivery ID.");
+
+            var restored = await _service.RestoreAsync(id);
+            return restored ? Ok() : NotFound();
+        }
+    }
+}
