@@ -58,4 +58,8 @@ nunit-*.xml
 bin/
 obj/
 wwwroot/
+<<<<<<< HEAD
 src/InventoryService/wwwroot/
+=======
+src/InventoryService/wwwroot/
+>>>>>>> 561d46a (Remove wwwroot from tracking and update .gitignore)
