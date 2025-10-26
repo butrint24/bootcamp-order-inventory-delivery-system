@@ -22,6 +22,9 @@ namespace InventoryService.Infrastructure.Data
                 entity.Property(e => e.Price).HasColumnName("price");
                 entity.Property(e => e.Category).HasColumnName("category").HasConversion<string>();
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+                entity.Property(e => e.ImageUrl).HasColumnName("image_url");
+
+        
 
             });
 

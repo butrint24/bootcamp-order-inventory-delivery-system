@@ -4,7 +4,6 @@ using Shared.Enums;
 
 namespace Shared.DTOs
 {
-    
     public class ProductCreateDto
     {
         [Required, MaxLength(200)]
@@ -22,7 +21,7 @@ namespace Shared.DTOs
         public Category? Category { get; set; }
     }
 
-        public class ProductUpdateDto
+    public class ProductUpdateDto
     {
         public string? Name { get; set; } = string.Empty;
 
@@ -36,6 +35,8 @@ namespace Shared.DTOs
         public decimal? Price { get; set; }
 
         public Category? Category { get; set; }
+        
+         public string? ImageUrl { get; set; }
     }
 
     public class ProductResponseDto
@@ -46,5 +47,8 @@ namespace Shared.DTOs
         public decimal Price { get; set; }
         public string Origin { get; set; } = string.Empty;
         public Category Category { get; set; }
+
+        
+        public string? ImageUrl { get; set; }
     }
 }

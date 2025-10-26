@@ -19,6 +19,7 @@ namespace Shared.Entities
 
         public bool IsActive { get; set; } = true;
 
+        public string? ImageUrl { get; set; }
         private Product() { }
 
         public Product(
