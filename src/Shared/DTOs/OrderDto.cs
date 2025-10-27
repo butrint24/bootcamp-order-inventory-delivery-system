@@ -17,7 +17,6 @@ namespace Shared.DTOs.Order
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
         public decimal Price { get; set; }
 
-        [Required(ErrorMessage = "Status is required.")]
         [StringLength(50)]
         public string Status { get; set; } = "OTHER";
 

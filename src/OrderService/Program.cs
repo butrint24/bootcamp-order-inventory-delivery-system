@@ -8,8 +8,12 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
 );
+
 
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
