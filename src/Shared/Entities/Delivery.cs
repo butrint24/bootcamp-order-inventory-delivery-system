@@ -27,10 +27,6 @@ namespace Shared.Entities
         public Guid OrderId { get; set; }
         public Guid UserId { get; set; }
 
-        public Guid OrderId { get; private set; 
-        }
-        public Guid UserId { get; private set; }
-
         private Delivery() { }
 
         public Delivery(Guid orderId, Guid userId, DateTime? eta = null)
