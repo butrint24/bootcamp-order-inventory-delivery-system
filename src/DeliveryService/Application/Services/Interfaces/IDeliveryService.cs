@@ -11,7 +11,17 @@ namespace DeliveryService.Application.Services.Interfaces
         Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto);
         Task<DeliveryResponseDto?> UpdateDeliveryAsync(Guid id, DeliveryUpdateDto dto);
         Task<DeliveryResponseDto?> GetByIdAsync(Guid id);
-        Task<IEnumerable<DeliveryResponseDto>> GetAllAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<DeliveryResponseDto>> GetAllAsync(
+            string? searchTerm,
+            string? sortBy,
+            bool ascending = true,
+            int pageNumber = 1,
+            int pageSize = 10,
+            DateTime? minEta = null,
+            DateTime? maxEta = null,
+            string? status = null,
+            Guid? orderId = null,
+            Guid? userId = null);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> RestoreAsync(Guid id);
     }
