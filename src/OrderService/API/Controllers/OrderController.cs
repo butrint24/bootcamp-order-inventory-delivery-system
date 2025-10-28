@@ -20,7 +20,6 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
             if (!TryGetUserId(out var userId))

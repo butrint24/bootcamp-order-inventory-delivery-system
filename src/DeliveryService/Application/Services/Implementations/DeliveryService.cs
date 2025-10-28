@@ -18,11 +18,14 @@ namespace DeliveryService.Application.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto)
+        public async Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto, Guid userId)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
+            //validate userId
+            dto.UserId = userId;
+            //validate orderId
             Delivery delivery = _mapper.Map<Delivery>(dto);
             delivery.IsActive = true;
             await _repo.AddAsync(delivery);

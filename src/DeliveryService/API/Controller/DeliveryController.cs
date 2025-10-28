@@ -20,10 +20,10 @@ namespace DeliveryService.API.Controller
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DeliveryCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
 
-            var result = await _service.CreateDeliveryAsync(dto);
+            var result = await _service.CreateDeliveryAsync(dto, userId);
             return Created("", result);
         }
 
@@ -97,6 +97,14 @@ namespace DeliveryService.API.Controller
 
             var restored = await _service.RestoreAsync(id);
             return restored ? Ok() : NotFound();
+        }
+        private bool TryGetUserId(out Guid userId)
+        {
+            userId = Guid.Empty;
+            if (!Request.Headers.TryGetValue("X-User-Id", out var header))
+                return false;
+
+            return Guid.TryParse(header, out userId);
         }
     }
 }

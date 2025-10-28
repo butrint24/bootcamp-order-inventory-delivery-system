@@ -10,8 +10,6 @@ namespace Shared.DTOs
     {
         [Required]
         public Guid OrderId { get; set; }
-
-        [Required]
         public Guid UserId { get; set; }
 
         public DateTime? Eta { get; set; }
