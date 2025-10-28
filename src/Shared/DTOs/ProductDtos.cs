@@ -19,6 +19,8 @@ namespace Shared.DTOs
         public decimal Price { get; set; }
 
         public Category? Category { get; set; }
+   
+        public string? ImageUrl { get; set; }
     }
 
     public class ProductUpdateDto
@@ -36,7 +38,10 @@ namespace Shared.DTOs
 
         public Category? Category { get; set; }
         
+<<<<<<< HEAD
          public string? ImageUrl { get; set; }
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
     }
 
     public class ProductResponseDto
@@ -48,7 +53,10 @@ namespace Shared.DTOs
         public string Origin { get; set; } = string.Empty;
         public Category Category { get; set; }
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         public string? ImageUrl { get; set; }
     }
 }

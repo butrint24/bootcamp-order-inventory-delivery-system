@@ -1,25 +1,30 @@
-using System.Net.Mime;
+using Shared.DTOs;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+<<<<<<< HEAD
 using Shared.DTOs;
+=======
+using System;
+using System.Threading.Tasks;
+>>>>>>> 9c4d298 (Add image upload support for Product)
 
 namespace InventoryService.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Produces(MediaTypeNames.Application.Json)]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _service;
-        private readonly IWebHostEnvironment _environment;
 
-        public ProductController(IProductService service, IWebHostEnvironment environment)
+        public ProductController(IProductService service)
         {
             _service = service;
-            _environment = environment;
         }
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpPost]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status201Created)]
@@ -36,23 +41,25 @@ namespace InventoryService.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.ProductId }, result);
         }
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpGet("{id:guid}")]
-        [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+        public async Task<IActionResult> GetById(Guid id)
         {
             if (id == Guid.Empty) return BadRequest("Invalid product ID.");
 
             var product = await _service.GetByIdAsync(id);
             if (product is null) return NotFound();
 
-            product.ImageUrl = ToAbsoluteUrl(product.ImageUrl);
             return Ok(product);
         }
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<ProductResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -79,7 +86,10 @@ namespace InventoryService.API.Controllers
             return Ok(products);
         }
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpPut("{id:guid}")]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(ProductResponseDto), StatusCodes.Status200OK)]
@@ -97,7 +107,10 @@ namespace InventoryService.API.Controllers
             return Ok(updated);
         }
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -110,18 +123,23 @@ namespace InventoryService.API.Controllers
             return ok ? NoContent() : NotFound();
         }
 
+<<<<<<< HEAD
         
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
         [HttpPatch("restore/{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Restore(Guid id, CancellationToken ct)
         {
-            if (id == Guid.Empty) return BadRequest("Invalid product ID.");
+            if (id == Guid.Empty)
+                return BadRequest("Invalid product ID.");
 
             var restored = await _service.RestoreAsync(id);
             return restored ? Ok() : NotFound();
         }
+<<<<<<< HEAD
 
         private string? ToAbsoluteUrl(string? url)
         {
@@ -153,5 +171,7 @@ namespace InventoryService.API.Controllers
 
             return "/" + Path.Combine(relFolder, fileName).Replace("\\", "/");
         }
+=======
+>>>>>>> 9c4d298 (Add image upload support for Product)
     }
 }

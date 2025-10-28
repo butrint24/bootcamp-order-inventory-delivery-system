@@ -127,5 +127,13 @@ namespace InventoryService.Infrastructure.Repositories.Implementations
             product.Activate();
             return true;
         }
+        public async Task<IEnumerable<Product>> GetAllAsync()
+{
+    return await _context.Products
+        .Where(p => p.IsActive)
+        .AsNoTracking()
+        .ToListAsync();
+}
+
     }
 }

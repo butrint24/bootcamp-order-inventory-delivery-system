@@ -22,6 +22,8 @@ namespace InventoryService.Infrastructure.Repositories.Interfaces
             bool? inStock = null
         );
 
+          Task<IEnumerable<Product>> GetAllAsync();
+
         void Update(Product product);
         void Remove(Product product);
         Task<int> SaveChangesAsync();
