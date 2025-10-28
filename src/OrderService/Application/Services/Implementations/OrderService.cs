@@ -20,8 +20,10 @@ namespace Application.Services.Implementations
             _repo = repo;
         }
 
-        public async Task<OrderDto> CreateOrderAsync(OrderDto dto)
+        public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
         {
+            //validate userid
+            dto.UserId = userId;
             var order = OrderMapping.ToEntity(dto);
 
             if (!Enum.IsDefined(typeof(OrderStatus), order.Status))
@@ -47,11 +49,17 @@ namespace Application.Services.Implementations
             return order == null ? null : OrderMapping.ToDto(order);
         }
 
-        public async Task<OrderDto?> UpdateOrderAsync(Guid id, OrderDto dto)
+        public async Task<OrderDto?> UpdateOrderAsync(Guid id, OrderDto dto, Guid userId)
         {
+            //validate userid
             var order = await _repo.GetByIdAsync(id);
             if (order == null) return null;
 
+            if (userId != order.UserId) // add or grpc call to check for admin role
+            {
+                throw new UnauthorizedAccessException("User is not authorized to update this order.");
+            }
+            
             OrderMapping.UpdateEntity(order, dto);
 
             _repo.Update(order);
@@ -60,10 +68,14 @@ namespace Application.Services.Implementations
             return OrderMapping.ToDto(order);
         }
 
-        public async Task<bool> DeleteOrderAsync(Guid id)
+        public async Task<bool> DeleteOrderAsync(Guid id, Guid userId)
         {
             var order = await _repo.GetByIdAsync(id);
             if (order == null) return false;
+            if (userId != order.UserId) // add or grpc call to check for admin role
+            {
+                throw new UnauthorizedAccessException("User is not authorized to delete this order.");
+            }
 
             _repo.Remove(order);
             await _repo.SaveChangesAsync();

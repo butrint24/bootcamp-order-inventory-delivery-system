@@ -23,7 +23,10 @@ namespace API.Controllers
         [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> CreateOrder([FromBody] OrderDto dto)
         {
-            var order = await _service.CreateOrderAsync(dto);
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var order = await _service.CreateOrderAsync(dto, userId);
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
         }
 
@@ -34,7 +37,10 @@ namespace API.Controllers
             if (id == Guid.Empty)
                 return BadRequest("Invalid order ID.");
 
-            var updatedOrder = await _service.UpdateOrderAsync(id, dto);
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var updatedOrder = await _service.UpdateOrderAsync(id, dto, userId);
 
             if (updatedOrder == null)
                 return NotFound($"Order with ID {id} not found.");
@@ -69,11 +75,22 @@ namespace API.Controllers
             if (id == Guid.Empty)
                 return BadRequest("Invalid order ID.");
 
-            var deleted = await _service.DeleteOrderAsync(id);
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var deleted = await _service.DeleteOrderAsync(id, userId);
             if (!deleted)
                 return NotFound($"Order with ID {id} not found.");
 
             return NoContent();
+        }
+        private bool TryGetUserId(out Guid userId)
+        {
+            userId = Guid.Empty;
+            if (!Request.Headers.TryGetValue("X-User-Id", out var header))
+                return false;
+
+            return Guid.TryParse(header, out userId);
         }
     }
 }

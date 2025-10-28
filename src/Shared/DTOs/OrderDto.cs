@@ -7,8 +7,8 @@ namespace Shared.DTOs.Order
     {
         public Guid OrderId { get; set; }
 
-        [Required(ErrorMessage = "UserId is required.")]
-        public Guid UserId { get; set; }
+        // [Required(ErrorMessage = "UserId is required.")]
+        // public Guid UserId { get; set; }
 
         [Required(ErrorMessage = "Address is required.")]
         [StringLength(250, ErrorMessage = "Address cannot be longer than 250 characters.")]
