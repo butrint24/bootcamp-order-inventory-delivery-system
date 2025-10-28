@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "DeliveryService.Grpc";
+
+package Delivery;
+
+service DeliveryService {
+    rpc createDelivery(CreateDeliveryMessage) returns (CreateDeliveryResponse);
+}
+
+message CreateDeliveryMessage {
+    string order_id = 1;
+    string user_id = 2;
+}
+
+message CreateDeliveryResponse {
+    bool success = 1;
+}

@@ -10,6 +10,12 @@
     <!-- AutoMapper -->
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
 
     <!-- Swagger / OpenAPI -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.15" />
@@ -27,5 +33,9 @@
   <ItemGroup>
     <!-- Reference to shared project -->
     <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="../Protos/*.proto" GrpcServices="Both" />
   </ItemGroup>
 </Project>

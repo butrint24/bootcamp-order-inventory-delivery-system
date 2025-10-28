@@ -8,6 +8,7 @@ using Shared.Enums;
 using Application.Services.Interfaces;
 using OrderService.Infrastructure.Repositories.Interfaces;
 using API.Mapping;
+using OrderService.Grpc;
 
 namespace Application.Services.Implementations
 {
@@ -59,13 +60,36 @@ namespace Application.Services.Implementations
             {
                 throw new UnauthorizedAccessException("User is not authorized to update this order.");
             }
-            
+
             OrderMapping.UpdateEntity(order, dto);
 
             _repo.Update(order);
             await _repo.SaveChangesAsync();
 
             return OrderMapping.ToDto(order);
+        }
+
+        public async Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(Guid id, OrderStatus status)
+        {
+            if (!Enum.IsDefined(typeof(OrderStatus), status))
+            {
+                throw new ArgumentException("Invalid order status.");
+            }
+            var order = await _repo.GetByIdAsync(id);
+            if (order == null)
+            {
+                throw new ArgumentException("Order not found.");
+            }
+
+            order.Status = status;
+            _repo.Update(order);
+            await _repo.SaveChangesAsync();
+
+            return new UpdateOrderStatusResponse
+            {
+                OrderId = order.OrderId.ToString(),
+                UpdatedStatus = status.ToString()
+            };
         }
 
         public async Task<bool> DeleteOrderAsync(Guid id, Guid userId)

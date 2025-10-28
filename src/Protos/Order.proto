@@ -11,11 +11,9 @@ service OrderService {
 message UpdateOrderStatusRequest {
     string order_id = 1;
     string status = 2;
-    string user_id = 3;
 }
 
 message UpdateOrderStatusResponse {
     string order_id = 1;
     string updated_status = 2;
-    string message = 3;
 }

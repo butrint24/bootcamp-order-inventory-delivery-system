@@ -1,3 +1,4 @@
+using DeliveryService.Grpc;
 using Shared.DTOs;
 using Shared.Entities;
 using System;
@@ -9,7 +10,8 @@ namespace DeliveryService.Application.Services.Interfaces
 {
     public interface IDeliveryService
     {
-        Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto);
+        Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto, Guid userId);
+        Task<CreateDeliveryResponse> CreateDeliveryGrpcAsync(Guid orderId, Guid userId);
         Task<DeliveryResponseDto?> UpdateDeliveryAsync(Guid id, DeliveryUpdateDto dto);
         Task<DeliveryResponseDto?> GetByIdAsync(Guid id);
         Task<IEnumerable<DeliveryResponseDto>> GetAllAsync(

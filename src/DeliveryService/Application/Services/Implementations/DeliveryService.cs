@@ -3,6 +3,8 @@ using DeliveryService.Application.Services.Interfaces;
 using AutoMapper;
 using DeliveryService.Infrastructure.Repositories.Interfaces;
 using Shared.Entities;
+using Shared.Enums;
+using DeliveryService.Grpc;
 
 namespace DeliveryService.Application.Services.Implementations
 {
@@ -32,6 +34,34 @@ namespace DeliveryService.Application.Services.Implementations
             await _repo.SaveChangesAsync();
 
             return _mapper.Map<DeliveryResponseDto>(delivery);
+        }
+
+        public async Task<CreateDeliveryResponse> CreateDeliveryGrpcAsync(Guid orderId, Guid userId)
+        {
+            DeliveryCreateDto dto = new DeliveryCreateDto
+            {
+                OrderId = orderId,
+                UserId = userId,
+                Status = DeliveryStatus.PENDING
+                // calculate ETA here
+            };
+
+            DeliveryResponseDto? delivery;
+            try
+            {
+                delivery = await CreateDeliveryAsync(dto, userId);
+            }
+            catch (Exception)
+            {
+                return new CreateDeliveryResponse
+                {
+                    Success = false
+                };
+            }
+            return new CreateDeliveryResponse
+            {
+                Success = delivery != null
+            };
         }
 
         public async Task<DeliveryResponseDto?> GetByIdAsync(Guid id)
