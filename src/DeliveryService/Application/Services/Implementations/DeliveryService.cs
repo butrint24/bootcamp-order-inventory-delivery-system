@@ -36,9 +36,22 @@ namespace DeliveryService.Application.Services.Implementations
             return delivery == null ? null : _mapper.Map<DeliveryResponseDto>(delivery);
         }
 
-        public async Task<IEnumerable<DeliveryResponseDto>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<DeliveryResponseDto>> GetAllAsync(
+            string? searchTerm,
+            string? sortBy,
+            bool ascending = true,
+            int pageNumber = 1,
+            int pageSize = 10,
+            DateTime? minEta = null,
+            DateTime? maxEta = null,
+            string? status = null,
+            Guid? orderId = null,
+            Guid? userId = null)
         {
-            var deliveries = await _repo.GetAllAsync(pageNumber, pageSize);
+            var deliveries = await _repo.SearchSortAndFilterAsync(
+                searchTerm, sortBy, ascending, pageNumber, pageSize,
+                minEta, maxEta, status, orderId, userId);
+
             return deliveries?.Select(d => _mapper.Map<DeliveryResponseDto>(d)) ?? Enumerable.Empty<DeliveryResponseDto>();
         }
 

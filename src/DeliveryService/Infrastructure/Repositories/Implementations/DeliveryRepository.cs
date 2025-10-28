@@ -25,11 +25,60 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
                 .FirstOrDefaultAsync(d => d.DeliveryId == id);
         }
 
-        public async Task<IEnumerable<Delivery>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Delivery>> SearchSortAndFilterAsync(
+            string? searchTerm,
+            string? sortBy,
+            bool ascending = true,
+            int pageNumber = 1,
+            int pageSize = 10,
+            DateTime? minEta = null,
+            DateTime? maxEta = null,
+            string? status = null,
+            Guid? orderId = null,
+            Guid? userId = null)
         {
-            return await _context.Deliveries
-                .Where(d => d.IsActive)
-                .OrderBy(d => d.CreatedAt)
+            var query = _context.Deliveries
+                .AsQueryable()
+                .Where(d => d.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var term = searchTerm.ToLower();
+                query = query.Where(d =>
+                    d.Status.ToLower().Contains(term) ||
+                    d.OrderId.ToString().ToLower().Contains(term) ||
+                    d.UserId.ToString().ToLower().Contains(term));
+            }
+
+            if (minEta.HasValue)
+                query = query.Where(d => d.Eta >= minEta.Value);
+
+            if (maxEta.HasValue)
+                query = query.Where(d => d.Eta <= maxEta.Value);
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                var statusLower = status.ToLower();
+                query = query.Where(d => d.Status.ToLower() == statusLower);
+            }
+
+            if (orderId.HasValue)
+                query = query.Where(d => d.OrderId == orderId.Value);
+
+            if (userId.HasValue)
+                query = query.Where(d => d.UserId == userId.Value);
+
+            query = sortBy?.ToLower() switch
+            {
+                "status" => ascending ? query.OrderBy(d => d.Status) : query.OrderByDescending(d => d.Status),
+                "eta" => ascending ? query.OrderBy(d => d.Eta) : query.OrderByDescending(d => d.Eta),
+                "createdat" => ascending ? query.OrderBy(d => d.CreatedAt) : query.OrderByDescending(d => d.CreatedAt),
+                "orderid" => ascending ? query.OrderBy(d => d.OrderId) : query.OrderByDescending(d => d.OrderId),
+                "userid" => ascending ? query.OrderBy(d => d.UserId) : query.OrderByDescending(d => d.UserId),
+                _ => query.OrderBy(d => d.CreatedAt)
+            };
+
+            return await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

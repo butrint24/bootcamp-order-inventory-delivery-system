@@ -41,7 +41,17 @@ namespace DeliveryService.API.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? sortBy,
+            [FromQuery] bool ascending = true,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] DateTime? minEta = null,
+            [FromQuery] DateTime? maxEta = null,
+            [FromQuery] string? status = null,
+            [FromQuery] Guid? orderId = null,
+            [FromQuery] Guid? userId = null)
         {
             if (pageNumber <= 0)
                 return BadRequest("Invalid page number.");
@@ -49,7 +59,7 @@ namespace DeliveryService.API.Controller
             if (pageSize <= 0 || pageSize > 100)
                 return BadRequest("Invalid page size.");
 
-            var deliveries = await _service.GetAllAsync(pageNumber, pageSize);
+            var deliveries = await _service.GetAllAsync(searchTerm, sortBy, ascending, pageNumber, pageSize, minEta, maxEta, status, orderId, userId);
             return Ok(deliveries);
         }
 
