@@ -21,9 +21,11 @@ namespace DeliveryService.Infrastructure.Repositories.Interfaces
         void Update(Delivery delivery);
         void Remove(Delivery delivery);
         Task<int> SaveChangesAsync();
-
         Task<bool> SoftDeleteAsync(Guid id);
-
         Task<bool> RestoreAsync(Guid id);
+
+        Task<List<Delivery>> GetNextPendingDeliveriesAsync(int count);
+        Task<List<Delivery>> GetNextDeliveriesToProcessAsync(int count);
+        Task<List<Delivery>> GetNextOnRouteDeliveriesAsync(int count);
     }
 }

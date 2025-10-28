@@ -4,6 +4,7 @@ namespace Shared.Enums
     {
         PENDING,
         PROCESSING,
+        ON_ROUTE,
         DELIVERED
     }
 }

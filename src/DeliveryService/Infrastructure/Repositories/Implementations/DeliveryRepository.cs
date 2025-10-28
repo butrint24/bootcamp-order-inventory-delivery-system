@@ -2,6 +2,7 @@ using DeliveryService.Infrastructure.Data;
 using DeliveryService.Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Shared.Entities;
+using Shared.Enums;
 
 namespace DeliveryService.Infrastructure.Repositories.Implementations
 {
@@ -121,5 +122,34 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
             return true;
         }
 
+        public async Task<List<Delivery>> GetNextPendingDeliveriesAsync(int count)
+        {
+            return await _context.Deliveries
+                .Where(d => d.Status == DeliveryStatus.PENDING.ToString() && d.IsActive)
+                .OrderBy(d => d.CreatedAt)
+                .ThenBy(d => d.OrderId)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<List<Delivery>> GetNextDeliveriesToProcessAsync(int count)
+        {
+            return await _context.Deliveries
+                .Where(d => d.Status == DeliveryStatus.PROCESSING.ToString() && d.IsActive)
+                .OrderBy(d => d.Eta)
+                .ThenBy(d => d.OrderId)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<List<Delivery>> GetNextOnRouteDeliveriesAsync(int count)
+        {
+            return await _context.Deliveries
+                .Where(d => d.Status == DeliveryStatus.ON_ROUTE.ToString() && d.IsActive)
+                .OrderBy(d => d.Eta)
+                .ThenBy(d => d.OrderId)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

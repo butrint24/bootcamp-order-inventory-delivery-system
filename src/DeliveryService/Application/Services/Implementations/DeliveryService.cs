@@ -10,6 +10,7 @@ namespace DeliveryService.Application.Services.Implementations
     {
         private readonly IDeliveryRepository _repo;
         private readonly IMapper _mapper;
+        private readonly int _DeliveriesToProcessPerDay = 20;
 
         public DeliveryService(IDeliveryRepository repo, IMapper mapper)
         {
@@ -84,6 +85,48 @@ namespace DeliveryService.Application.Services.Implementations
             var restored = await _repo.RestoreAsync(id);
             if (restored) await _repo.SaveChangesAsync();
             return restored;
+        }
+
+        public async Task ProcessPendingDeliveriesAsync()
+        {
+            var pendingDeliveries = await _repo.GetNextPendingDeliveriesAsync(_DeliveriesToProcessPerDay);
+
+            foreach (var delivery in pendingDeliveries)
+            {
+                delivery.MarkProcessing();
+                //update order status here
+                _repo.Update(delivery);
+            }
+
+            await _repo.SaveChangesAsync();
+        }
+
+        public async Task ProcessDeliveriesToProcessAsync()
+        {
+            var deliveriesToProcess = await _repo.GetNextDeliveriesToProcessAsync(_DeliveriesToProcessPerDay);
+
+            foreach (var delivery in deliveriesToProcess)
+            {
+                delivery.MarkOnRoute();
+                //also here
+                _repo.Update(delivery);
+            }
+
+            await _repo.SaveChangesAsync();
+        }
+
+        public async Task ProcessOnRouteDeliveriesAsync()
+        {
+            var onRouteDeliveries = await _repo.GetNextOnRouteDeliveriesAsync(_DeliveriesToProcessPerDay);
+
+            foreach (var delivery in onRouteDeliveries)
+            {
+                delivery.MarkDelivered();
+                //and here
+                _repo.Update(delivery);
+            }
+
+            await _repo.SaveChangesAsync();
         }
     }
 }

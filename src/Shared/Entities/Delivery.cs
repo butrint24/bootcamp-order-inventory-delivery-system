@@ -45,11 +45,16 @@ namespace Shared.Entities
                 throw new InvalidOperationException("Delivery can only be processed from pending state.");
             Status = "PROCESSING";
         }
-
-        public void MarkDelivered()
+        public void MarkOnRoute()
         {
             if (Status != "PROCESSING")
-                throw new InvalidOperationException("Delivery must be in processing state before being delivered.");
+                throw new InvalidOperationException("Delivery must be in processing state before being marked on route.");
+            Status = "ON_ROUTE";
+        }
+        public void MarkDelivered()
+        {
+            if (Status != "ON_ROUTE")
+                throw new InvalidOperationException("Delivery must be on route before being delivered.");
             Status = "DELIVERED";
         }
 

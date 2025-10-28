@@ -2,6 +2,7 @@ using Shared.DTOs;
 using Shared.Entities;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace DeliveryService.Application.Services.Interfaces
@@ -24,5 +25,6 @@ namespace DeliveryService.Application.Services.Interfaces
             Guid? userId = null);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> RestoreAsync(Guid id);
+        Task ProcessPendingDeliveriesAsync();
     }
 }
