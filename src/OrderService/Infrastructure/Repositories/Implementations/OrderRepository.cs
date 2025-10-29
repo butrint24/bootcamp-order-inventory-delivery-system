@@ -20,13 +20,15 @@ namespace OrderService.Infrastructure.Repositories.Implementations
 
         public async Task AddAsync(Order order)
         {
+            order.CreatedAt = DateTime.Now;
+            order.UpdatedAt = DateTime.Now;
             await _context.Orders.AddAsync(order);
         }
 
         public async Task<Order?> GetByIdAsync(Guid id)
         {
             return await _context.Orders
-                .Include(o => o.Items)
+                // .Include(o => o.Items)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
         }
 
@@ -42,6 +44,7 @@ namespace OrderService.Infrastructure.Repositories.Implementations
 
         public void Update(Order order)
         {
+            order.UpdatedAt = DateTime.Now;
             _context.Orders.Update(order);
         }
 

@@ -11,8 +11,9 @@ namespace Shared.Entities
         public string Address { get; set; } = null!;
         public decimal Price { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.PENDING;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; } = DateTime.Now;
+
 
         public bool IsDeleted { get; set; } = false;
 

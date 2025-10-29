@@ -129,7 +129,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in pendingDeliveries)
             {
                 delivery.MarkProcessing();
-                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.PROCESSING.ToString());
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, OrderStatus.PROCESSING.ToString());
                 _repo.Update(delivery);
             }
 
@@ -143,7 +143,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in deliveriesToProcess)
             {
                 delivery.MarkOnRoute();
-                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.ON_ROUTE.ToString());
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, OrderStatus.SHIPPED.ToString());
                 _repo.Update(delivery);
             }
 
@@ -157,7 +157,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in onRouteDeliveries)
             {
                 delivery.MarkDelivered();
-                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.DELIVERED.ToString());
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, OrderStatus.COMPLETED.ToString());
                 _repo.Update(delivery);
             }
 
