@@ -151,5 +151,22 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
                 .Take(count)
                 .ToListAsync();
         }
+
+        public async Task<int> GetPendingCountAsync()
+        {
+            return await _context.Deliveries
+                .Where(d => d.Status == DeliveryStatus.PENDING.ToString() && d.IsActive)
+                .CountAsync();
+        }  
+
+        public async Task<int> GetProcessedCountForDateAsync(DateTime date)
+        {
+            // Count deliveries marked PROCESSING on the specified date
+            return await _context.Deliveries
+                .Where(d => d.Status == DeliveryStatus.PROCESSING.ToString()
+                            && d.IsActive
+                            && d.UpdatedAt.Date == date.Date) // assuming UpdatedAt tracks status changes
+                .CountAsync();
+        } 
     }
 }

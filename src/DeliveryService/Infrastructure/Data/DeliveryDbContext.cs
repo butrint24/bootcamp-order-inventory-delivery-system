@@ -39,6 +39,12 @@ namespace DeliveryService.Infrastructure.Data
                           v => DateTime.SpecifyKind(v, DateTimeKind.Utc),
                           v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                       );
+                entity.Property(e => e.UpdatedAt)
+                      .HasColumnName("updated_at")
+                      .HasConversion(
+                          v => DateTime.SpecifyKind(v, DateTimeKind.Utc),
+                          v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                      );
 
                 entity.Property(e => e.IsActive)
                       .HasColumnName("is_active")

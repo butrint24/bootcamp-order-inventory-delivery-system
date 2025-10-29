@@ -55,6 +55,7 @@ CREATE DATABASE delivery_db;
    status VARCHAR(20) DEFAULT 'PENDING',
    eta TIMESTAMP,
    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    is_active BOOLEAN DEFAULT TRUE,
    order_id UUID,
    user_id UUID

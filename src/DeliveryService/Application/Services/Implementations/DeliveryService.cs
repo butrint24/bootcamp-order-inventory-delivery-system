@@ -39,12 +39,13 @@ namespace DeliveryService.Application.Services.Implementations
 
         public async Task<CreateDeliveryResponse> CreateDeliveryGrpcAsync(Guid orderId, Guid userId)
         {
+            var eta = await CalculateEtaAsync();
             DeliveryCreateDto dto = new DeliveryCreateDto
             {
                 OrderId = orderId,
                 UserId = userId,
-                Status = DeliveryStatus.PENDING
-                // calculate ETA here
+                Status = DeliveryStatus.PENDING,
+                Eta = eta
             };
 
             DeliveryResponseDto? delivery;
@@ -162,5 +163,39 @@ namespace DeliveryService.Application.Services.Implementations
 
             await _repo.SaveChangesAsync();
         }
+        private async Task<DateTime> CalculateEtaAsync()
+        {
+            int dailyCapacity = _DeliveriesToProcessPerDay;
+            var now = DateTime.Now;
+            var cronHour = 8;
+
+            var pendingCount = await _repo.GetPendingCountAsync();
+
+            var processedTodayCount = await _repo.GetProcessedCountForDateAsync(DateTime.Today);
+
+            int remainingSlotsToday = dailyCapacity - processedTodayCount;
+
+            int daysToWait = 0;
+
+            if (now.Hour < cronHour)
+            {
+                if (pendingCount < remainingSlotsToday)
+                    daysToWait = 0;
+                else
+                    daysToWait = (pendingCount - remainingSlotsToday) / dailyCapacity + 
+                                ((pendingCount - remainingSlotsToday) % dailyCapacity != 0 ? 1 : 0);
+            }
+            else
+            {
+                daysToWait = pendingCount / dailyCapacity + (pendingCount % dailyCapacity != 0 ? 1 : 0);
+            }
+
+            var eta = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, cronHour, 0, 0)
+                            .AddDays(daysToWait);
+
+            return eta;
+        }
+
+
     }
 }

@@ -23,6 +23,13 @@ namespace Shared.Entities
             set => _createdAt = DateTime.SpecifyKind(value, DateTimeKind.Utc);
         }
 
+        private DateTime _updatedAt = DateTime.UtcNow;
+        public DateTime UpdatedAt
+        {
+            get => _updatedAt;
+            set => _updatedAt = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        }
+
         public bool IsActive { get; set; } = true;
         public Guid OrderId { get; private set; }
         public Guid UserId { get; private set; }
