@@ -1,4 +1,4 @@
-using DeliveryService.Grpc;
+using DeliveryService.GrpcGenerated;
 using Shared.DTOs;
 using Shared.Entities;
 using System;
@@ -28,5 +28,7 @@ namespace DeliveryService.Application.Services.Interfaces
         Task<bool> DeleteAsync(Guid id);
         Task<bool> RestoreAsync(Guid id);
         Task ProcessPendingDeliveriesAsync();
+        Task ProcessDeliveriesToProcessAsync();
+        Task ProcessOnRouteDeliveriesAsync();
     }
 }

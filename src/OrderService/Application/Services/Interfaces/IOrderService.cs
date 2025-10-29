@@ -1,4 +1,4 @@
-using OrderService.Grpc;
+using OrderService.GrpcGenerated;
 using Shared.DTOs.Order;
 using Shared.Enums;
 using System;

@@ -1,14 +1,19 @@
+using DeliveryService.Application.Services.Interfaces;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DeliveryService.Application.Services.Implementations
 {
     public class DeliverySchedulerService : IHostedService, IDisposable
     {
         private Timer _timer = null!;
-        private readonly DeliveryService _deliveryService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public DeliverySchedulerService(DeliveryService deliveryService)
+        public DeliverySchedulerService(IServiceProvider serviceProvider)
         {
-            _deliveryService = deliveryService;
+            _serviceProvider = serviceProvider;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -19,16 +24,26 @@ namespace DeliveryService.Application.Services.Implementations
 
         private async void RunScheduledTasks(object? state)
         {
+            using var scope = _serviceProvider.CreateScope();
+            var deliveryService = scope.ServiceProvider.GetRequiredService<IDeliveryService>();
+
             var now = DateTime.Now;
 
-            if (now.Hour == 8 && now.Minute == 0)
-                await _deliveryService.ProcessPendingDeliveriesAsync();
+            try
+            {
+                if (now.Hour == 8 && now.Minute == 0)
+                    await deliveryService.ProcessPendingDeliveriesAsync();
 
-            if (now.Hour == 12 && now.Minute == 0)
-                await _deliveryService.ProcessDeliveriesToProcessAsync();
+                if (now.Hour == 12 && now.Minute == 0)
+                    await deliveryService.ProcessDeliveriesToProcessAsync();
 
-            if (now.Hour == 17 && now.Minute == 0)
-                await _deliveryService.ProcessOnRouteDeliveriesAsync();
+                if (now.Hour == 17 && now.Minute == 0)
+                    await deliveryService.ProcessOnRouteDeliveriesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeliveryScheduler error: {ex.Message}");
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

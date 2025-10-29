@@ -8,17 +8,20 @@ using Shared.Enums;
 using Application.Services.Interfaces;
 using OrderService.Infrastructure.Repositories.Interfaces;
 using API.Mapping;
-using OrderService.Grpc;
+using OrderService.GrpcGenerated;
+using OrderService.Application.Clients;
 
 namespace Application.Services.Implementations
 {
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _repo;
+        private readonly DeliveryGrpcClient _deliveryClient;
 
-        public OrderService(IOrderRepository repo)
+        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient)
         {
             _repo = repo;
+            _deliveryClient = deliveryClient;
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
@@ -34,6 +37,8 @@ namespace Application.Services.Implementations
 
             await _repo.AddAsync(order);
             await _repo.SaveChangesAsync();
+
+            await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
 
             return OrderMapping.ToDto(order);
         }

@@ -1,13 +1,13 @@
 using Application.Services.Interfaces;
 using Grpc.Core;
-using OrderService.Grpc;
+using OrderService.GrpcGenerated;
 using Shared.Enums;
 using System;
 using System.Threading.Tasks;
 
 namespace API.Grpc
 {
-    public class OrderGrpcService : OrderService.Grpc.OrderService.OrderServiceBase
+    public class OrderGrpcService : OrderService.GrpcGenerated.OrderService.OrderServiceBase
     {
         private readonly IOrderService _orderService;
 

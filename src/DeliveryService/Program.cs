@@ -6,6 +6,8 @@ using DeliveryService.Application.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using DeliveryService.API.Mapping;
+using DeliveryService.Application.Clients;
+using DeliveryService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +29,23 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
 
 
 builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+builder.Services.AddGrpc();
 builder.Services.AddScoped<IDeliveryService, DeliveryService.Application.Services.Implementations.DeliveryService>();
 builder.Services.AddHostedService<DeliverySchedulerService>();
 builder.Services.AddAutoMapper(typeof(DeliveryProfile).Assembly);
-builder.WebHost.UseUrls("http://localhost:7004");
+builder.Services.AddGrpcClient<OrderService.GrpcGenerated.OrderService.OrderServiceClient>(o =>
+{
+    o.Address = new Uri("http://localhost:7002");
+});
+builder.Services.AddScoped<OrderGrpcClient>();
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(7004, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
 
 var app = builder.Build();
 
@@ -40,6 +55,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+app.MapGrpcService<DeliveryGrpcService>();
 app.MapControllers();
 
 app.Run();

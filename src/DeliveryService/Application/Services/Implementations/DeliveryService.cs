@@ -4,7 +4,8 @@ using AutoMapper;
 using DeliveryService.Infrastructure.Repositories.Interfaces;
 using Shared.Entities;
 using Shared.Enums;
-using DeliveryService.Grpc;
+using DeliveryService.GrpcGenerated;
+using DeliveryService.Application.Clients;
 
 namespace DeliveryService.Application.Services.Implementations
 {
@@ -12,12 +13,14 @@ namespace DeliveryService.Application.Services.Implementations
     {
         private readonly IDeliveryRepository _repo;
         private readonly IMapper _mapper;
+        private readonly OrderGrpcClient _orderClient;
         private readonly int _DeliveriesToProcessPerDay = 20;
 
-        public DeliveryService(IDeliveryRepository repo, IMapper mapper)
+        public DeliveryService(IDeliveryRepository repo, IMapper mapper, OrderGrpcClient orderClient)
         {
             _repo = repo;
             _mapper = mapper;
+            _orderClient = orderClient;
         }
 
         public async Task<DeliveryResponseDto> CreateDeliveryAsync(DeliveryCreateDto dto, Guid userId)
@@ -127,7 +130,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in pendingDeliveries)
             {
                 delivery.MarkProcessing();
-                //update order status here
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.PROCESSING.ToString());
                 _repo.Update(delivery);
             }
 
@@ -141,7 +144,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in deliveriesToProcess)
             {
                 delivery.MarkOnRoute();
-                //also here
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.ON_ROUTE.ToString());
                 _repo.Update(delivery);
             }
 
@@ -155,7 +158,7 @@ namespace DeliveryService.Application.Services.Implementations
             foreach (var delivery in onRouteDeliveries)
             {
                 delivery.MarkDelivered();
-                //and here
+                await _orderClient.UpdateOrderStatusAsync(delivery.OrderId, DeliveryStatus.DELIVERED.ToString());
                 _repo.Update(delivery);
             }
 

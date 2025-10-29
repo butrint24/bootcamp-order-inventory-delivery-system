@@ -1,10 +1,10 @@
 using DeliveryService.Application.Services.Interfaces;
-using DeliveryService.Grpc;
+using DeliveryService.GrpcGenerated;
 using Grpc.Core;
 
 namespace DeliveryService.API.Grpc
 {
-    public class DeliveryGrpcService : DeliveryService.Grpc.DeliveryService.DeliveryServiceBase
+    public class DeliveryGrpcService : DeliveryService.GrpcGenerated.DeliveryService.DeliveryServiceBase
     {
         private readonly IDeliveryService _deliveryService;
 
