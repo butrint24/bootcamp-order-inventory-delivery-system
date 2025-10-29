@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Shared.Entities;
 using Shared.DTOs;
+using Shared.Enums;
+using UserService.GrpcGenerated;
 
 namespace Application.Services.Interfaces
 {
@@ -14,5 +16,6 @@ namespace Application.Services.Interfaces
         Task<UserResponseDto?> UpdateAsync(Guid id, UserUpdateDto dto);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> RestoreAsync(Guid id);
+        Task<bool> ValidateUserAsync(Guid userId, RoleType? requiredRole);
     }
 }

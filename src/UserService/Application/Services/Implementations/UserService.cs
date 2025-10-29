@@ -6,6 +6,8 @@ using Shared.DTOs;
 using AutoMapper;
 using Shared.Entities;
 using UserService.Infrastructure.Repositories.Interfaces;
+using UserService.GrpcGenerated;
+using Shared.Enums;
 
 namespace Application.Services.Implementations
 {
@@ -24,9 +26,9 @@ namespace Application.Services.Implementations
         {
             var user = _mapper.Map<User>(dto);
 
-            if(await _repo.ExistsAsync(user.Tel, user.Email))
+            if (await _repo.ExistsAsync(user.Tel, user.Email))
                 throw new InvalidOperationException("A user with the same telephone or email already exists.");
-            
+
             await _repo.AddAsync(user);
             await _repo.SaveChangesAsync();
 
@@ -92,6 +94,18 @@ namespace Application.Services.Implementations
 
             await _repo.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<bool> ValidateUserAsync(Guid userId, RoleType? requiredRole)
+        {
+            var user = await _repo.GetByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            if (requiredRole == null)
+                return true;
+
+            return requiredRole == user.Role;
         }
     }
 }

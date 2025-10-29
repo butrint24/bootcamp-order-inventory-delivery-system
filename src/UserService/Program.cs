@@ -7,6 +7,7 @@ using AutoMapper;
 using Application.Services.Interfaces;
 using Application.Services.Implementations;
 using Shared.Helpers;
+using UserService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddGrpc();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, Application.Services.Implementations.UserService>();
@@ -39,8 +41,13 @@ builder.Services.AddSingleton<JwtHelper>(sp =>
     return new JwtHelper(config);
 });
 
-builder.WebHost.UseUrls("http://localhost:7003");
-
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(7003, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -49,5 +56,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGrpcService<UserGrpcService>();
 app.MapControllers();
 app.Run();

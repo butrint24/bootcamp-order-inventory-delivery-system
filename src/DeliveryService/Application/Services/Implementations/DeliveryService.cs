@@ -28,9 +28,7 @@ namespace DeliveryService.Application.Services.Implementations
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));
 
-            //validate userId
             dto.UserId = userId;
-            //validate orderId
             Delivery delivery = _mapper.Map<Delivery>(dto);
             delivery.IsActive = true;
             await _repo.AddAsync(delivery);

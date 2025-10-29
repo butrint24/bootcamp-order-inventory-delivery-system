@@ -17,16 +17,22 @@ namespace Application.Services.Implementations
     {
         private readonly IOrderRepository _repo;
         private readonly DeliveryGrpcClient _deliveryClient;
+        private readonly UserGrpcClient _userClient;
 
-        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient)
+        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient)
         {
             _repo = repo;
             _deliveryClient = deliveryClient;
+            _userClient = userClient;
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
         {
-            //validate userid
+            var userValidation = await _userClient.ValidateUserAsync(userId, "");
+            if (!userValidation.Validated)
+            {
+                throw new UnauthorizedAccessException("User is not authorized to create an order.");
+            }
             dto.UserId = userId;
             var order = OrderMapping.ToEntity(dto);
 
@@ -57,14 +63,14 @@ namespace Application.Services.Implementations
 
         public async Task<OrderDto?> UpdateOrderAsync(Guid id, OrderDto dto, Guid userId)
         {
-            //validate userid
-            var order = await _repo.GetByIdAsync(id);
-            if (order == null) return null;
-
-            if (userId != order.UserId) // add or grpc call to check for admin role
+            var userValidation = await _userClient.ValidateUserAsync(userId, RoleType.Admin.ToString());
+            if (!userValidation.Validated)
             {
                 throw new UnauthorizedAccessException("User is not authorized to update this order.");
             }
+
+            var order = await _repo.GetByIdAsync(id);
+            if (order == null) return null;
 
             OrderMapping.UpdateEntity(order, dto);
 
@@ -101,7 +107,8 @@ namespace Application.Services.Implementations
         {
             var order = await _repo.GetByIdAsync(id);
             if (order == null) return false;
-            if (userId != order.UserId) // add or grpc call to check for admin role
+            var userValidation = await _userClient.ValidateUserAsync(userId, RoleType.Admin.ToString());
+            if (userId != order.UserId || !userValidation.Validated)
             {
                 throw new UnauthorizedAccessException("User is not authorized to delete this order.");
             }

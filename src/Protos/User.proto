@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "UserService.GrpcGenerated";
+
+package User;
+
+service UserService {
+    rpc ValidateUser(UserValidationMessage) returns (UserValidationResponse);   
+}
+
+message UserValidationMessage {
+    string userId = 1;
+    string role = 2;
+}
+
+message UserValidationResponse {
+    bool validated = 1;
+}

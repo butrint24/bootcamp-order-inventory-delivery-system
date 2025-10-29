@@ -29,6 +29,12 @@ builder.Services.AddGrpcClient<DeliveryService.GrpcGenerated.DeliveryService.Del
 });
 builder.Services.AddScoped<DeliveryGrpcClient>();
 
+builder.Services.AddGrpcClient<UserService.GrpcGenerated.UserService.UserServiceClient>(o =>
+{
+    o.Address = new Uri("http://localhost:7003");
+});
+builder.Services.AddScoped<UserGrpcClient>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
