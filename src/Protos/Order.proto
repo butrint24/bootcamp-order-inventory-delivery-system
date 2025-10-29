@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package orderservice;
+
+option csharp_namespace = "OrderService.Grpc";
+
+service OrderService {
+  rpc GetUserOrders(GetUserOrdersRequest) returns (GetUserOrdersResponse);
+}
+
+message GetUserOrdersRequest {
+  string user_id = 1;
+}
+
+message GetUserOrdersResponse {
+  repeated OrderMessage orders = 1;
+}
+
+message OrderMessage {
+  string order_id = 1;
+  string status = 2;
+  double price = 3;
+}

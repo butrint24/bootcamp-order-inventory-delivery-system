@@ -20,6 +20,13 @@ namespace Application.Services.Implementations
             _repo = repo;
         }
 
+        public async Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(string userId)
+        {
+            var orders = await _repo.GetByUserIdAsync(userId);
+            
+            return orders.Select(OrderMapping.ToDto);
+        }
+
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto)
         {
             var order = OrderMapping.ToEntity(dto);

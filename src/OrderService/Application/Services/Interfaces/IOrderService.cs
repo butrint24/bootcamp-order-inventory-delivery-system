@@ -7,6 +7,7 @@ namespace Application.Services.Interfaces
 {
     public interface IOrderService
     {
+        Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(string userId);
         Task<OrderDto> CreateOrderAsync(OrderDto dto);
         Task<IEnumerable<OrderDto>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10);
         Task<OrderDto?> GetOrderByIdAsync(Guid id);

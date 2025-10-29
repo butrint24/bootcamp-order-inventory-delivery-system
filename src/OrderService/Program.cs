@@ -4,6 +4,7 @@ using OrderService.Infrastructure.Repositories.Interfaces;
 using OrderService.Infrastructure.Repositories.Implementations;
 using OrderService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using OrderService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +15,16 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
 );
 
-
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddGrpc();
+
 
 builder.WebHost.UseUrls("http://localhost:7002");
 
@@ -31,6 +35,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.MapGrpcService<OrderGrpcService>();
+
 
 app.MapControllers();
 
