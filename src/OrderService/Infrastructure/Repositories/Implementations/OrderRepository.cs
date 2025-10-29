@@ -20,17 +20,14 @@ namespace OrderService.Infrastructure.Repositories.Implementations
 
         public async Task<IEnumerable<Order>> GetByUserIdAsync(string userId)
         {
-            // First, try to parse the incoming string into a Guid.
             if (!Guid.TryParse(userId, out Guid userGuid))
             {
-                // If the string is not a valid Guid, return an empty list.
                 return Enumerable.Empty<Order>();
             }
 
-            // Now, use the converted 'userGuid' in the query.
             return await _context.Orders
                 .Include(o => o.Items)
-                .Where(o => o.UserId == userGuid) // This now correctly compares a Guid to a Guid
+                .Where(o => o.UserId == userGuid)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
         }
@@ -61,8 +58,6 @@ namespace OrderService.Infrastructure.Repositories.Implementations
         {
             _context.Orders.Update(order);
         }
-
-
 
         public void Remove(Order order)
         {

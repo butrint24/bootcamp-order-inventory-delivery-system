@@ -31,7 +31,6 @@ namespace OrderService.API.Grpc
                 {
                     OrderId = dto.OrderId.ToString(),
                     Status = dto.Status.ToString(),
-                    // CHANGE THIS LINE: Explicitly cast the decimal to a double.
                     Price = (double)dto.Price 
                 });
             }

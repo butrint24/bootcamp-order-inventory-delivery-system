@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- 
-      THIS IS THE CORRECT PATH FOR YOUR TEAM'S STRUCTURE.
-      It means "go up one directory, then into the Protos folder".
-      The 'Link' attribute makes it appear locally in Visual Studio for convenience.
-    -->
     <Protobuf Include="..\Protos\Order.proto" GrpcServices="Server" Link="Protos\Order.proto" />
   </ItemGroup>
 
