@@ -1,11 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Shared.Entities
 {
     public class UserAuth
     {
+        [Required]
         public Guid Id { get; private set; } = Guid.NewGuid();
+
+        [Required]
         public Guid UserId { get; private set; }
+
+        [Required]
+        [StringLength(256)] 
         public string PasswordHash { get; private set; } = null!;
+
+        [StringLength(256)]
         public string? RefreshToken  { get; private set; }
+
         public DateTime? RefreshTokenExpiryTime { get; private set; }
 
 
