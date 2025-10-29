@@ -1,12 +1,15 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Entities
 {
     public class Delivery
     {
+        [Required]
         public Guid DeliveryId { get; private set; } = Guid.NewGuid();
 
-        
+        [Required]
+        [StringLength(50)]
         public string Status { get; private set; } = "PENDING";
 
         private DateTime? _eta;
@@ -16,6 +19,7 @@ namespace Shared.Entities
             set => _eta = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
         }
 
+        [Required]
         private DateTime _createdAt = DateTime.UtcNow;
         public DateTime CreatedAt
         {
@@ -31,7 +35,11 @@ namespace Shared.Entities
         }
 
         public bool IsActive { get; set; } = true;
+
+        [Required]
         public Guid OrderId { get; private set; }
+
+        [Required]
         public Guid UserId { get; private set; }
 
         private Delivery() { }

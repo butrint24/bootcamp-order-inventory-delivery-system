@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Shared.Enums;
 
 namespace Shared.DTOs.Order
 {
     public class OrderDto
     {
+        [Required]
         public Guid OrderId { get; set; }
 
         // [Required(ErrorMessage = "UserId is required.")]
@@ -17,9 +19,11 @@ namespace Shared.DTOs.Order
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
         public decimal Price { get; set; }
 
+        [Required]
         [StringLength(50)]
         public string Status { get; set; } = "OTHER";
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

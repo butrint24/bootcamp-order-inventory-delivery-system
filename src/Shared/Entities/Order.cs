@@ -1,15 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Shared.Enums;
 
 namespace Shared.Entities
 {
     public class Order
     {
+        [Required]
         public Guid OrderId { get; set; } = Guid.NewGuid();
+
+        [Required]
         public Guid UserId { get; set; }
+
+        [Required]
+        [StringLength(250)]
         public string Address { get; set; } = null!;
+
+        [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
+
+        [Required]
         public OrderStatus Status { get; set; } = OrderStatus.PENDING;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; } = DateTime.Now;

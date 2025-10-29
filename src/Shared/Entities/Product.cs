@@ -1,20 +1,29 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using Shared.Enums;
 
 namespace Shared.Entities
 {
     public class Product
     {
+        [Required]
         public Guid ProductId { get; set; } = Guid.NewGuid();
 
+        [Required]
+        [StringLength(200)]
         public string Name { get; set; } = null!;
 
+        [Range(0, int.MaxValue)]
         public int Stock { get; set; }
 
+        [Required]
+        [StringLength(100)]
         public string Origin { get; set; } = null!;
 
+        [Required]
         public Category Category { get; set; }
 
+        [Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
 
         public bool IsActive { get; set; } = true;
