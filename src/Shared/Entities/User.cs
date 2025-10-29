@@ -1,18 +1,39 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using Shared.Enums;
 
 namespace Shared.Entities
 {
     public class User
     {
+        [Required]
         public Guid UserId { get; private set; } = Guid.NewGuid();
+
+        [Required]
+        [StringLength(100)]
         public string Name { get; private set; } = null!;
+
+        [Required]
+        [StringLength(100)]
         public string Surname { get; private set; } = null!;
+
         public DateOnly? DateOfBirth { get; private set; }
+
+        [Required]
+        [Phone]
         public string Tel { get; private set; } = null!;
+
+        [Required]
+        [EmailAddress]
         public string Email { get; private set; } = null!;
+
+        [Required]
+        [StringLength(200)]
         public string Address { get; private set; } = null!;
+
         public bool IsActive { get; private set; } = true;
+
+        [Required]
         public RoleType Role { get; private set; }
 
         private User() { }
