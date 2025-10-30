@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using InventoryService.GrpcGenerated;
 
 namespace Application.Services.Implementations
 {
@@ -14,11 +15,13 @@ namespace Application.Services.Implementations
     {
         private readonly IProductRepository _repo;
         private readonly IMapper _mapper;
+        private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IProductRepository repo, IMapper mapper)
+        public ProductService(IProductRepository repo, IMapper mapper, ILogger<ProductService> logger)
         {
             _repo = repo;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto)
@@ -101,6 +104,42 @@ namespace Application.Services.Implementations
             if (restored)
                 await _repo.SaveChangesAsync();
             return restored;
+        }
+
+        public async Task<GrpcProduct> ReserveProductStock(Guid productId, int quantity)
+        {
+            var product = await _repo.GetByIdAsync(productId);
+            if (product == null || product.Stock < quantity)
+                throw new InvalidOperationException("Insufficient stock or product not found.");
+            
+            product.UpdateStock(product.Stock - quantity);
+
+            _repo.Update(product);
+            await _repo.SaveChangesAsync();
+
+            _logger.LogInformation("Reserving stock for ProductId: {ProductId}, Quantity: {Quantity}, StockAfterReservation: {Stock}", productId, quantity, product.Stock);
+
+            return new GrpcProduct
+            {
+                ProductId = productId.ToString(),
+                BoughtStock = quantity,
+                Price = (double)product.Price
+            };
+        }
+
+        public async Task RollbackProductStockAsync(Guid productId, int quantity)
+        {
+            var product = await _repo.GetByIdAsync(productId);
+            if (product == null)
+                return;
+
+            product.UpdateStock(product.Stock + quantity);
+            _repo.Update(product);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _repo.SaveChangesAsync();
         }
     }
 }

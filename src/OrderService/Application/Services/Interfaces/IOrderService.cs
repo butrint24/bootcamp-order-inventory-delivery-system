@@ -4,6 +4,7 @@ using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Shared.DTOs;
 
 namespace Application.Services.Interfaces
 {
@@ -15,5 +16,7 @@ namespace Application.Services.Interfaces
         Task<OrderDto?> UpdateOrderAsync(Guid id, OrderDto dto, Guid userId);
         Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(Guid id, OrderStatus status);
         Task<bool> DeleteOrderAsync(Guid id, Guid userId);
+        Task<OrderDto?> BuyCartAsync(ShoppingCartDto shoppingCartDto, Guid userId);
+        Task<bool> IsOrderPersisted(Guid id);
     }
 }
