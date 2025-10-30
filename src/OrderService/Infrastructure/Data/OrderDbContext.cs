@@ -41,7 +41,8 @@ namespace OrderService.Infrastructure.Data
                 entity.Property(e => e.OrderItemId).HasColumnName("order_item_id");
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
-                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at")
+                    .HasColumnType("timestamp");
             });
         }
     }

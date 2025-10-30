@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Shared.DTOs.Order;
+using Shared.DTOs;
 using Shared.Entities;
 using Shared.Enums;
 using Application.Services.Interfaces;
@@ -10,6 +11,7 @@ using OrderService.Infrastructure.Repositories.Interfaces;
 using API.Mapping;
 using OrderService.GrpcGenerated;
 using OrderService.Application.Clients;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Application.Services.Implementations
 {
@@ -117,5 +119,46 @@ namespace Application.Services.Implementations
             await _repo.SaveChangesAsync();
             return true;
         }
+
+        public async Task<OrderDto?> BuyCartAsync(ShoppingCartDto shoppingCartDto, Guid userId)
+        {
+            var userValidation = await _userClient.ValidateUserAsync(userId, "");
+            if (!userValidation.Validated)
+                throw new UnauthorizedAccessException("User is not authorized to create an order.");
+            
+            Order order = new()
+            {
+                UserId = userId,
+                Status = OrderStatus.PENDING,
+                Items = new List<OrderItem>()
+            };
+
+            foreach (var (productId, quantity) in shoppingCartDto.ItemsAndQuantities)
+            {
+                var orderItem = CreateOrderItemEntity(order.OrderId, productId, quantity);
+                order.Items.Add(orderItem);
+            }
+
+            order.Price = 0; //calculate price from products
+
+            // Get address from user service
+
+            await _repo.AddAsync(order);
+            await _repo.SaveChangesAsync();
+
+            await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
+
+            return OrderMapping.ToDto(order);
+        }
+        private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
+        {
+            return new OrderItem
+            {
+                OrderId = orderId,
+                ProductId = productId,
+                Quantity = quantity
+            };
+        }
+
     }
 }

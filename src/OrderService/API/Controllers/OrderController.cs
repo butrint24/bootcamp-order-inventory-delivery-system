@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Services.Interfaces;
 using Shared.DTOs.Order;
+using Shared.DTOs;
 using System;
 using System.Threading.Tasks;
 using Shared.Attributes;
@@ -83,6 +84,17 @@ namespace API.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("buy-cart")]
+        public async Task<IActionResult> BuyCart([FromBody] ShoppingCartDto shoppingCartDto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var order = await _service.BuyCartAsync(shoppingCartDto, userId);
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
+        }
+
         private bool TryGetUserId(out Guid userId)
         {
             userId = Guid.Empty;
