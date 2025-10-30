@@ -12,6 +12,7 @@ namespace OrderService.Infrastructure.Repositories.Interfaces
         Task<IEnumerable<Order>> GetAllAsync(int pageNumber, int pageSize);
         void Update(Order order);                       
         void Remove(Order order);
-        Task<int> SaveChangesAsync();                     
+        Task<int> SaveChangesAsync();
+        Task AddOrderItemAsync(OrderItem orderItem);               
     }
 }

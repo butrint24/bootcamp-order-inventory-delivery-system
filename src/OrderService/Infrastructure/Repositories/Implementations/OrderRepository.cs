@@ -57,5 +57,11 @@ namespace OrderService.Infrastructure.Repositories.Implementations
         {
             return await _context.SaveChangesAsync();
         }
+
+        public async Task AddOrderItemAsync(OrderItem orderItem)
+        {
+            orderItem.CreatedAt = DateTime.Now;
+            await _context.OrderItems.AddAsync(orderItem);
+        }
     }
 }
