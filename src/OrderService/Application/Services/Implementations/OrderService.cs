@@ -185,8 +185,7 @@ namespace Application.Services.Implementations
         public async Task<bool> IsOrderPersisted(Guid id)
         {
             var order = await _repo.GetByIdAsync(id);
-            return false;
-            // return order != null;
+            return order != null;
         }
         private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
         {
