@@ -6,6 +6,7 @@ package order;
 
 service OrderService {
     rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse);
+    rpc CheckOrderPersistence(PersistenceCheck) returns (PersistenceResponse);
 }
 
 message UpdateOrderStatusRequest {
@@ -16,4 +17,12 @@ message UpdateOrderStatusRequest {
 message UpdateOrderStatusResponse {
     string order_id = 1;
     string updated_status = 2;
+}
+
+message PersistenceCheck{
+    string order_id = 1;
+}
+
+message PersistenceResponse{
+    bool persisted = 1;
 }
