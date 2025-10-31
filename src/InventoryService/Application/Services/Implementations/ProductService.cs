@@ -106,23 +106,40 @@ namespace Application.Services.Implementations
             return restored;
         }
 
-        public Task<GrpcProduct> ReserveProductStock(Guid productId, int quantity)
+        public async Task<GrpcProduct> ReserveProductStock(Guid productId, int quantity)
         {
-            var grpcProducts = new List<GrpcProduct>();
-            var product = _repo.GetByIdAsync(productId).Result;
+            var product = await _repo.GetByIdAsync(productId);
             if (product == null || product.Stock < quantity)
                 throw new InvalidOperationException("Insufficient stock or product not found.");
+            
             product.UpdateStock(product.Stock - quantity);
 
-            _logger.LogInformation("HELLO QITU");
-            _logger.LogInformation("Reserving stock for ProductId: {ProductId}, Quantity: {Quantity}, StockAfterReservation: {Stock}", productId, quantity, product.Price);
+            _repo.Update(product);
+            await _repo.SaveChangesAsync();
 
-            return Task.FromResult(new GrpcProduct
+            _logger.LogInformation("Reserving stock for ProductId: {ProductId}, Quantity: {Quantity}, StockAfterReservation: {Stock}", productId, quantity, product.Stock);
+
+            return new GrpcProduct
             {
                 ProductId = productId.ToString(),
                 BoughtStock = quantity,
                 Price = (double)product.Price
-            });
+            };
+        }
+
+        public async Task RollbackProductStockAsync(Guid productId, int quantity)
+        {
+            var product = await _repo.GetByIdAsync(productId);
+            if (product == null)
+                return;
+
+            product.UpdateStock(product.Stock + quantity);
+            _repo.Update(product);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _repo.SaveChangesAsync();
         }
     }
 }

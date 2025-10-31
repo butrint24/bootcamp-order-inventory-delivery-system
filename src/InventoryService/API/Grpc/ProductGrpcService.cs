@@ -26,14 +26,8 @@ namespace InventoryService.API.Grpc
             _logger = logger;
         }
 
-        public override async Task<GetProductsResponse> GetProducts(BuyProductsMessage request, ServerCallContext context)
+        public override async Task<GetProductsResponse> BuyProducts(BuyProductsMessage request, ServerCallContext context)
         {
-            _logger.LogInformation("Received GetProducts request for OrderId: {OrderId}", request.OrderId);
-            foreach (var kvp in request.IdsAndQuantities)
-            {
-                _logger.LogInformation("Requested ProductId: {ProductId}, Quantity: {Quantity}", kvp.Key, kvp.Value);
-            }
-
             var reservedProducts = new List<GrpcProduct>();
 
             foreach (var (productId, quantity) in request.IdsAndQuantities)
@@ -42,7 +36,6 @@ namespace InventoryService.API.Grpc
                 {
                     var product = await _productService.ReserveProductStock(Guid.Parse(productId), quantity);
                     reservedProducts.Add(product);
-                    _logger.LogInformation("Reserved ProductId: {ProductId}, Quantity: {Quantity}, StockAfterReservation: {Stock}", productId, quantity, product.BoughtStock);
                 }
                 catch (KeyNotFoundException)
                 {
@@ -69,23 +62,37 @@ namespace InventoryService.API.Grpc
 
             _logger.LogInformation("Sending GetProducts response for OrderId: {OrderId} with {Count} products", request.OrderId, reservedProducts.Count);
 
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(2000);
-                    var persisted = await _orderClient.IsOrderPersistedAsync(Guid.Parse(request.OrderId));
-                    _logger.LogInformation("Inside Time is: {Time}", DateTime.UtcNow);
-                    _logger.LogInformation("Order {OrderId} persisted: {Persisted}", request.OrderId, persisted);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Order check failed for OrderId: {OrderId}", request.OrderId);
-                }
-            });
+            _ = Task.Run(() => ConfirmOrRollbackAsync(Guid.Parse(request.OrderId), reservedProducts));
 
-            _logger.LogInformation("Outside time is: {Time}", DateTime.UtcNow);
             return response;
         }
+
+        private async Task ConfirmOrRollbackAsync(Guid orderId, List<GrpcProduct> reservedProducts)
+        {
+            try
+            {
+                await Task.Delay(2000);
+                var persisted = await _orderClient.IsOrderPersistedAsync(orderId);
+
+                if (!persisted)
+                {
+                    foreach (var product in reservedProducts)
+                        await _productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
+
+                    await _productService.SaveChangesAsync();
+                }
+
+                _logger.LogInformation("Order {OrderId} persisted: {Persisted}", orderId, persisted);
+            }
+            catch (Exception ex)
+            {
+                foreach (var product in reservedProducts)
+                    await _productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
+
+                await _productService.SaveChangesAsync();
+                _logger.LogError(ex, "Order check failed for OrderId: {OrderId}", orderId);
+            }
+        }
+
     }
 }

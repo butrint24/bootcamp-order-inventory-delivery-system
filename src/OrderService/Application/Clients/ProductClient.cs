@@ -19,14 +19,8 @@ namespace OrderService.Application.Clients
             _logger = logger;
         }
 
-        public async Task<GetProductsResponse> GetProductsAsync(Dictionary<Guid, int> productIdsAndQuantities, Guid orderId)
+        public async Task<GetProductsResponse> BuyProductsAsync(Dictionary<Guid, int> productIdsAndQuantities, Guid orderId)
         {
-            _logger.LogInformation("Sending GetProducts request for OrderId: {OrderId}", orderId);
-            foreach (var kvp in productIdsAndQuantities)
-            {
-                _logger.LogInformation("ProductId: {ProductId}, Quantity: {Quantity}", kvp.Key, kvp.Value);
-            }
-
             var request = new BuyProductsMessage
             {
                 OrderId = orderId.ToString()
@@ -42,7 +36,7 @@ namespace OrderService.Application.Clients
             GetProductsResponse response;
             try
             {
-                response = await _client.GetProductsAsync(request);
+                response = await _client.BuyProductsAsync(request);
                 _logger.LogInformation("Received response for OrderId: {OrderId}, Success: {Success}, ProductsCount: {Count}",
                     orderId, response.Success, response.GrpcProducts.Count);
             }

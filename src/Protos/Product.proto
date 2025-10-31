@@ -5,7 +5,7 @@ option csharp_namespace = "InventoryService.GrpcGenerated";
 package ProductGrpc;
 
 service ProductService {
-    rpc GetProducts(BuyProductsMessage) returns (GetProductsResponse);
+    rpc BuyProducts(BuyProductsMessage) returns (GetProductsResponse);
 }
 
 message BuyProductsMessage {

@@ -92,6 +92,8 @@ namespace API.Controllers
                 return Forbid("Missing or invalid X-User-Id header.");
 
             var order = await _service.BuyCartAsync(shoppingCartDto, userId);
+            if (order == null)
+                return Conflict("Failed to create order from shopping cart.");
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
         }
 

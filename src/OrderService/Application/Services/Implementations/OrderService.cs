@@ -128,8 +128,13 @@ namespace Application.Services.Implementations
         {
             _logger.LogInformation("Starting BuyCart for UserId: {UserId}", userId);
 
+            if(shoppingCartDto.ItemsAndQuantities == null || !shoppingCartDto.ItemsAndQuantities.Any())
+            {
+                _logger.LogWarning("Shopping cart is empty for UserId: {UserId}", userId);
+                throw new ArgumentException("Shopping cart cannot be empty.");
+            }
+
             var userValidation = await _userClient.ValidateUserAsync(userId, "");
-            _logger.LogInformation("User validation result for UserId {UserId}: {Validated}", userId, userValidation.Validated);
 
             if (!userValidation.Validated)
             {
@@ -143,44 +148,35 @@ namespace Application.Services.Implementations
                 Status = OrderStatus.PENDING,
                 Items = new List<OrderItem>()
             };
-            _logger.LogInformation("Created new order entity with temporary Id: {OrderId}", order.OrderId);
 
             foreach (var (productId, quantity) in shoppingCartDto.ItemsAndQuantities)
             {
                 var orderItem = CreateOrderItemEntity(order.OrderId, productId, quantity);
                 order.Items.Add(orderItem);
-                _logger.LogInformation("Added OrderItem: ProductId {ProductId}, Quantity {Quantity}", productId, quantity);
             }
 
             var productIdsAndQuantities = shoppingCartDto.ItemsAndQuantities
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            _logger.LogInformation("Requesting product reservation from InventoryService for OrderId: {OrderId}", order.OrderId);
-            var inventoryResponse = await _productClient.GetProductsAsync(productIdsAndQuantities, order.OrderId);
+            var inventoryResponse = await _productClient.BuyProductsAsync(productIdsAndQuantities, order.OrderId);
 
             if (!inventoryResponse.Success)
             {
-                _logger.LogError("Failed to reserve stock for OrderId: {OrderId}", order.OrderId);
-                throw new InvalidOperationException("Failed to reserve stock for some products.");
+                _logger.LogWarning("Stock reservation failed for UserId: {UserId}, OrderId: {OrderId}", userId, order.OrderId);
+                return null;
             }
 
             order.Price = inventoryResponse.GrpcProducts.Sum(p => (decimal)p.Price * productIdsAndQuantities[Guid.Parse(p.ProductId)]);
-            _logger.LogInformation("Calculated total order price for OrderId {OrderId}: {Price}", order.OrderId, order.Price);
 
-            order.Address = "some address"; // get from user service
-            _logger.LogInformation("Set order address for OrderId {OrderId}: {Address}", order.OrderId, order.Address);
+            order.Address = "some address"; //mos harro me request prej user service
 
             await _repo.AddAsync(order);
-            _logger.LogInformation("Order entity added to repository for OrderId {OrderId}", order.OrderId);
 
             await _repo.SaveChangesAsync();
-            _logger.LogInformation("Order saved to database for OrderId {OrderId}", order.OrderId);
 
             await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
-            _logger.LogInformation("Delivery created for OrderId {OrderId}", order.OrderId);
 
             var orderDto = OrderMapping.ToDto(order);
-            _logger.LogInformation("Returning OrderDto for OrderId {OrderId}", order.OrderId);
 
             return orderDto;
         }
