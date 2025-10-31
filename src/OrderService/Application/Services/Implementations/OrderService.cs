@@ -168,7 +168,8 @@ namespace Application.Services.Implementations
 
             order.Price = inventoryResponse.GrpcProducts.Sum(p => (decimal)p.Price * productIdsAndQuantities[Guid.Parse(p.ProductId)]);
 
-            order.Address = "some address"; //mos harro me request prej user service
+            var userInfo = await _userClient.GetUserInfoAsync(userId);
+            order.Address = userInfo.Address;
 
             await _repo.AddAsync(order);
 
