@@ -76,22 +76,33 @@ namespace API.Controllers
             return NoContent();
         }
 
-        [HttpGet("user-orders/{userId}")]
-        public async Task<IActionResult> GetUserOrders(string userId)
+        [HttpGet("user-orders")]
+        public async Task<IActionResult> GetUserOrders()
         {
-            try
+            if (!TryGetUserId(out var userId))
             {
-                var orders = await _service.GetOrdersForUserAsync(userId);
-
-                if (orders == null || !orders.Any())
-                    return NotFound($"No orders found for user with ID {userId}");
-
-                return Ok(orders);
+                return Forbid("Missing or invalid X-User-Id header.");
             }
-            catch (Exception ex)
+            
+            var orders = await _service.GetOrdersForUserAsync(userId.ToString());
+
+            if (orders == null || !orders.Any())
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return NotFound($"No orders found for user with ID {userId}");
             }
+
+            return Ok(orders);
+        }
+
+        private bool TryGetUserId(out Guid userId)
+        {
+            userId = Guid.Empty;
+            if (!Request.Headers.TryGetValue("X-User-Id", out var headerValue))
+            {
+                return false;
+            }
+
+            return Guid.TryParse(headerValue, out userId);
         }
     }
 }
