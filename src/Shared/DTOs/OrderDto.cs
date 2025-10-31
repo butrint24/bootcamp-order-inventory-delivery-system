@@ -24,6 +24,8 @@ namespace Shared.DTOs.Order
         public string Status { get; set; } = "OTHER";
 
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;     
+
+        public List<OrderItemDto> Items { get; set; } = new();
     }
 }

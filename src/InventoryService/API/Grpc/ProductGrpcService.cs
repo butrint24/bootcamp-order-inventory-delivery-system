@@ -15,15 +15,19 @@ namespace InventoryService.API.Grpc
         private readonly IProductService _productService;
         private readonly OrderGrpcClient _orderClient;
         private readonly ILogger<ProductGrpcService> _logger;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public ProductGrpcService(
-            IProductService productService, 
+            IProductService productService,
             OrderGrpcClient orderClient,
-            ILogger<ProductGrpcService> logger)
+            ILogger<ProductGrpcService> logger,
+            IServiceScopeFactory serviceScopeFactory
+            )
         {
             _productService = productService;
             _orderClient = orderClient;
             _logger = logger;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public override async Task<GetProductsResponse> BuyProducts(BuyProductsMessage request, ServerCallContext context)
@@ -69,6 +73,9 @@ namespace InventoryService.API.Grpc
 
         private async Task ConfirmOrRollbackAsync(Guid orderId, List<GrpcProduct> reservedProducts)
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+
             try
             {
                 await Task.Delay(2000);
@@ -79,7 +86,7 @@ namespace InventoryService.API.Grpc
                     foreach (var product in reservedProducts)
                         await _productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
 
-                    await _productService.SaveChangesAsync();
+                    await productService.SaveChangesAsync();
                 }
 
                 _logger.LogInformation("Order {OrderId} persisted: {Persisted}", orderId, persisted);
@@ -87,9 +94,9 @@ namespace InventoryService.API.Grpc
             catch (Exception ex)
             {
                 foreach (var product in reservedProducts)
-                    await _productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
+                    await productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
 
-                await _productService.SaveChangesAsync();
+                await productService.SaveChangesAsync();
                 _logger.LogError(ex, "Order check failed for OrderId: {OrderId}", orderId);
             }
         }

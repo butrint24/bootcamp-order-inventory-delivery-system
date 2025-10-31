@@ -28,14 +28,14 @@ namespace OrderService.Infrastructure.Repositories.Implementations
         public async Task<Order?> GetByIdAsync(Guid id)
         {
             return await _context.Orders
-                // .Include(o => o.Items)
+                .Include(o => o.Items)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
         }
 
         public async Task<IEnumerable<Order>> GetAllAsync(int pageNumber, int pageSize)
         {
             return await _context.Orders
-                // .Include(o => o.Items)
+                .Include(o => o.Items)
                 .OrderBy(o => o.CreatedAt)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
