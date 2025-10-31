@@ -21,5 +21,15 @@ namespace OrderService.Application.Clients
 
             return await _client.ValidateUserAsync(request);
         }
+
+        public async Task<UserInfoMessage> GetUserInfoAsync(Guid userId)
+        {
+            var request = new UserIdMessage
+            {
+                UserId = userId.ToString()
+            };
+
+            return await _client.GetUserInfoAsync(request);
+        }
     }
 }
