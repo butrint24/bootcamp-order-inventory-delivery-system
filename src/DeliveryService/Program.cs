@@ -34,6 +34,7 @@ builder.Services.AddScoped<IDeliveryService, DeliveryService.Application.Service
 builder.Services.AddHostedService<DeliverySchedulerService>();
 builder.Services.AddAutoMapper(typeof(DeliveryProfile).Assembly);
 <<<<<<< HEAD
+<<<<<<< HEAD
 builder.Services.AddGrpcClient<OrderService.GrpcGenerated.OrderService.OrderServiceClient>(o =>
 {
     o.Address = new Uri("http://localhost:7002");
@@ -51,6 +52,10 @@ builder.WebHost.ConfigureKestrel(options =>
 // builder.WebHost.UseUrls("http://localhost:7004");
 builder.WebHost.UseUrls("http://0.0.0.0:7004");
 >>>>>>> e989525 (Add Kubernetes local setup for InventoryService with Postgres)
+=======
+builder.WebHost.UseUrls("http://localhost:7004");
+
+>>>>>>> 77c9f8b (WIP: K8s tweaks (Program.cs for URLs/ports))
 
 var app = builder.Build();
 
