@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+  namespace: shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory
+  template:
+    metadata:
+      labels:
+        app: inventory
+    spec:
+      containers:
+        - name: inventory
+          image: inventory_service:local
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 7001
+              name: http
+              env:
+              - name: ConnectionStrings__DefaultConnection
+                value: "Host=postgres.shop.svc.cluster.local;Port=5432;Database=inventory_db;Username=starlabs;Password=bootcamp"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory
+  namespace: shop
+spec:
+  type: ClusterIP
+  selector:
+    app: inventory
+  ports:
+    - name: http
+      port: 7001
+      targetPort: 7001

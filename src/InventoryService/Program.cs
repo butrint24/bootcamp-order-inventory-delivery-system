@@ -24,11 +24,12 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
-builder.WebHost.UseUrls("http://localhost:7001");
-
+//builder.WebHost.UseUrls("http://localhost:7001");
+builder.WebHost.UseUrls("http://0.0.0.0:7001");
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+if(true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
