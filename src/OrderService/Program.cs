@@ -39,6 +39,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+<<<<<<< HEAD
+<<<<<<< HEAD
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenLocalhost(7002, listenOptions =>
@@ -46,6 +48,14 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
+=======
+// builder.WebHost.UseUrls("http://localhost:7002");
+builder.WebHost.UseUrls("http://0.0.0.0:7002");
+>>>>>>> e989525 (Add Kubernetes local setup for InventoryService with Postgres)
+=======
+builder.WebHost.UseUrls("http://localhost:7002");
+
+>>>>>>> 77c9f8b (WIP: K8s tweaks (Program.cs for URLs/ports))
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

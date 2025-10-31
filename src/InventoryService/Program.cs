@@ -29,6 +29,7 @@ builder.WebHost.UseUrls("http://localhost:7001");
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
+
 {
     app.UseSwagger();
     app.UseSwaggerUI();

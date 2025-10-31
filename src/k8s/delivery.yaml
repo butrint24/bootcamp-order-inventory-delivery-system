@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery
+  namespace: shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery
+  template:
+    metadata:
+      labels:
+        app: delivery
+    spec:
+      containers:
+        - name: delivery
+          image: delivery_service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7004
+              name: http
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=postgres.shop.svc.cluster.local;Port=5432;Database=delivery_db;Username=starlabs;Password=bootcamp"
+          livenessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 7004
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 7004
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery
+  namespace: shop
+spec:
+  type: ClusterIP
+  selector:
+    app: delivery
+  ports:
+    - name: http
+      port: 7004
+      targetPort: 7004
+      

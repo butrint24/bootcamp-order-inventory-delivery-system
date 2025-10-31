@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+  namespace: shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: order
+          image: order_service:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: InventoryGrpcUrl
+              value: "http://inventory.shop.svc.cluster.local:7001"
+            - name: DeliveryGrpcUrl
+              value: "http://delivery.shop.svc.cluster.local:7004"
+          ports:
+            - containerPort: 7002
+              name: http
+              env:
+               - name: ConnectionStrings__DefaultConnection
+                 value: "Host=postgres.shop.svc.cluster.local;Port=5432;Database=order_db;Username=starlabs;Password=bootcamp"
+          livenessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 7002
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 7002
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  namespace: shop
+spec:
+  type: ClusterIP
+  selector:
+    app: order
+  ports:
+    - name: http
+      port: 80
+      targetPort: 7002
+      
