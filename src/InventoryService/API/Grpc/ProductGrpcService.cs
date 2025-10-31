@@ -84,7 +84,7 @@ namespace InventoryService.API.Grpc
                 if (!persisted)
                 {
                     foreach (var product in reservedProducts)
-                        await _productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
+                        await productService.RollbackProductStockAsync(Guid.Parse(product.ProductId), product.BoughtStock);
 
                     await productService.SaveChangesAsync();
                 }
