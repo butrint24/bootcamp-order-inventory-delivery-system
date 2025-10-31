@@ -75,5 +75,23 @@ namespace API.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("user-orders/{userId}")]
+        public async Task<IActionResult> GetUserOrders(string userId)
+        {
+            try
+            {
+                var orders = await _service.GetOrdersForUserAsync(userId);
+
+                if (orders == null || !orders.Any())
+                    return NotFound($"No orders found for user with ID {userId}");
+
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

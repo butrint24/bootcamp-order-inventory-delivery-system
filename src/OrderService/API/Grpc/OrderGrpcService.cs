@@ -1,12 +1,13 @@
 using Grpc.Core;
-using OrderService.Grpc;
+using OrderService.GrpcGenerated;
 using Application.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using GrpcService = OrderService.GrpcGenerated.OrderService;
 
-namespace OrderService.API.Grpc 
+namespace OrderService.API.Grpc
 {
-    public class OrderGrpcService : OrderService.Grpc.OrderService.OrderServiceBase
+    public class OrderGrpcService : GrpcService.OrderServiceBase
     {
         private readonly IOrderService _service;
         private readonly ILogger<OrderGrpcService> _logger;
@@ -31,10 +32,10 @@ namespace OrderService.API.Grpc
                 {
                     OrderId = dto.OrderId.ToString(),
                     Status = dto.Status.ToString(),
-                    Price = (double)dto.Price 
+                    Price = (double)dto.Price
                 });
             }
-            
+
             _logger.LogInformation("--- Found {OrderCount} orders for User ID: {UserId} ---", response.Orders.Count, request.UserId);
 
             return response;
