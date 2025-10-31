@@ -23,16 +23,37 @@ namespace UserService.API.Grpc
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid User ID format."));
             }
 
-           Shared.Enums.RoleType? requiredRole = 
-                Enum.TryParse<Shared.Enums.RoleType>(request.Role, true, out var parsedRole)
-                    ? parsedRole
-                    : (Shared.Enums.RoleType?)null;
+            Shared.Enums.RoleType? requiredRole =
+                 Enum.TryParse<Shared.Enums.RoleType>(request.Role, true, out var parsedRole)
+                     ? parsedRole
+                     : (Shared.Enums.RoleType?)null;
 
             var isValid = await _userService.ValidateUserAsync(userId, requiredRole);
 
             return new UserValidationResponse
             {
                 Validated = isValid
+            };
+        }
+        
+        public override async Task<UserInfoMessage> GetUserInfo(UserIdMessage request, ServerCallContext context)
+        {
+            if (!Guid.TryParse(request.UserId, out var userId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid User ID format."));
+            }
+
+            var userInfo = await _userService.GetByIdAsync(userId);
+            if (userInfo == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, "User not found."));
+            }
+
+            return new UserInfoMessage
+            {
+                Email = userInfo.Email,
+                Address = userInfo.Address,
+                Tel = userInfo.Tel
             };
         }
     }

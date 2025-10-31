@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Shared.DTOs.Order;
+using Shared.DTOs;
 using Shared.Entities;
 using Shared.Enums;
 using Application.Services.Interfaces;
@@ -10,6 +11,7 @@ using OrderService.Infrastructure.Repositories.Interfaces;
 using API.Mapping;
 using OrderService.GrpcGenerated;
 using OrderService.Application.Clients;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Application.Services.Implementations
 {
@@ -18,12 +20,16 @@ namespace Application.Services.Implementations
         private readonly IOrderRepository _repo;
         private readonly DeliveryGrpcClient _deliveryClient;
         private readonly UserGrpcClient _userClient;
+        private readonly ProductClient _productClient;
+        private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient)
+        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient, ProductClient productClient, ILogger<OrderService> logger)
         {
             _repo = repo;
             _deliveryClient = deliveryClient;
             _userClient = userClient;
+            _productClient = productClient;
+            _logger = logger;
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
@@ -117,5 +123,79 @@ namespace Application.Services.Implementations
             await _repo.SaveChangesAsync();
             return true;
         }
+
+        public async Task<OrderDto?> BuyCartAsync(ShoppingCartDto shoppingCartDto, Guid userId)
+        {
+            _logger.LogInformation("Starting BuyCart for UserId: {UserId}", userId);
+
+            if(shoppingCartDto.ItemsAndQuantities == null || !shoppingCartDto.ItemsAndQuantities.Any())
+            {
+                _logger.LogWarning("Shopping cart is empty for UserId: {UserId}", userId);
+                throw new ArgumentException("Shopping cart cannot be empty.");
+            }
+
+            var userValidation = await _userClient.ValidateUserAsync(userId, "");
+
+            if (!userValidation.Validated)
+            {
+                _logger.LogWarning("User {UserId} is not authorized to create an order.", userId);
+                throw new UnauthorizedAccessException("User is not authorized to create an order.");
+            }
+
+            var order = new Order
+            {
+                UserId = userId,
+                Status = OrderStatus.PENDING,
+                Items = new List<OrderItem>()
+            };
+
+            foreach (var (productId, quantity) in shoppingCartDto.ItemsAndQuantities)
+            {
+                var orderItem = CreateOrderItemEntity(order.OrderId, productId, quantity);
+                order.Items.Add(orderItem);
+            }
+
+            var productIdsAndQuantities = shoppingCartDto.ItemsAndQuantities
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            var inventoryResponse = await _productClient.BuyProductsAsync(productIdsAndQuantities, order.OrderId);
+
+            if (!inventoryResponse.Success)
+            {
+                _logger.LogWarning("Stock reservation failed for UserId: {UserId}, OrderId: {OrderId}", userId, order.OrderId);
+                return null;
+            }
+
+            order.Price = inventoryResponse.GrpcProducts.Sum(p => (decimal)p.Price * productIdsAndQuantities[Guid.Parse(p.ProductId)]);
+
+            var userInfo = await _userClient.GetUserInfoAsync(userId);
+            order.Address = userInfo.Address;
+
+            await _repo.AddAsync(order);
+
+            await _repo.SaveChangesAsync();
+
+            await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
+
+            var orderDto = OrderMapping.ToDto(order);
+
+            return orderDto;
+        }
+
+        public async Task<bool> IsOrderPersisted(Guid id)
+        {
+            var order = await _repo.GetByIdAsync(id);
+            return order != null;
+        }
+        private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
+        {
+            return new OrderItem
+            {
+                OrderId = orderId,
+                ProductId = productId,
+                Quantity = quantity
+            };
+        }
+
     }
 }

@@ -42,6 +42,7 @@ CREATE TABLE order_item (
   order_item_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID,
   product_id UUID,
+  created_at TIMESTAMP DEFAULT NOW(),
   quantity INT
 );
 

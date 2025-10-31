@@ -32,5 +32,17 @@ namespace API.Grpc
 
             return response;
         }
+        public override async Task<PersistenceResponse> CheckOrderPersistence(PersistenceCheck request, ServerCallContext context)
+        {
+            try
+            {
+                var isPersisted = await _orderService.IsOrderPersisted(Guid.Parse(request.OrderId));
+                return new PersistenceResponse { Persisted = isPersisted };
+            }
+            catch (FormatException)
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid Order ID format."));
+            }
+        }
     }
 }

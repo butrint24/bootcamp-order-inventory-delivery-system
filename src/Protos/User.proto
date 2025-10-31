@@ -6,6 +6,7 @@ package User;
 
 service UserService {
     rpc ValidateUser(UserValidationMessage) returns (UserValidationResponse);   
+    rpc GetUserInfo(UserIdMessage) returns (UserInfoMessage);
 }
 
 message UserValidationMessage {
@@ -15,4 +16,14 @@ message UserValidationMessage {
 
 message UserValidationResponse {
     bool validated = 1;
+}
+
+message UserIdMessage {
+    string userId = 1;
+}
+
+message UserInfoMessage{
+    string email = 1;
+    string address = 2;
+    string tel = 3;
 }
