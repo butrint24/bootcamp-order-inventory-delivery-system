@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "InventoryService.GrpcGenerated";
+
+package ProductGrpc;
+
+service ProductService {
+    rpc GetProducts(BuyProductsMessage) returns (GetProductsResponse);
+}
+
+message BuyProductsMessage {
+    map<string, int32> idsAndQuantities = 1;
+    string orderId = 2;
+}
+
+message GrpcProduct {
+    string productId = 1;
+    int32 boughtStock = 3;
+    double price = 4;
+}
+
+message GetProductsResponse {
+    repeated GrpcProduct grpcProducts = 1;
+    bool success = 2;
+}

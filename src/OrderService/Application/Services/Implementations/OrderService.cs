@@ -20,12 +20,16 @@ namespace Application.Services.Implementations
         private readonly IOrderRepository _repo;
         private readonly DeliveryGrpcClient _deliveryClient;
         private readonly UserGrpcClient _userClient;
+        private readonly ProductClient _productClient;
+        private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient)
+        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient, ProductClient productClient, ILogger<OrderService> logger)
         {
             _repo = repo;
             _deliveryClient = deliveryClient;
             _userClient = userClient;
+            _productClient = productClient;
+            _logger = logger;
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
@@ -122,33 +126,69 @@ namespace Application.Services.Implementations
 
         public async Task<OrderDto?> BuyCartAsync(ShoppingCartDto shoppingCartDto, Guid userId)
         {
+            _logger.LogInformation("Starting BuyCart for UserId: {UserId}", userId);
+
             var userValidation = await _userClient.ValidateUserAsync(userId, "");
+            _logger.LogInformation("User validation result for UserId {UserId}: {Validated}", userId, userValidation.Validated);
+
             if (!userValidation.Validated)
+            {
+                _logger.LogWarning("User {UserId} is not authorized to create an order.", userId);
                 throw new UnauthorizedAccessException("User is not authorized to create an order.");
-            
-            Order order = new()
+            }
+
+            var order = new Order
             {
                 UserId = userId,
                 Status = OrderStatus.PENDING,
                 Items = new List<OrderItem>()
             };
+            _logger.LogInformation("Created new order entity with temporary Id: {OrderId}", order.OrderId);
 
             foreach (var (productId, quantity) in shoppingCartDto.ItemsAndQuantities)
             {
                 var orderItem = CreateOrderItemEntity(order.OrderId, productId, quantity);
                 order.Items.Add(orderItem);
+                _logger.LogInformation("Added OrderItem: ProductId {ProductId}, Quantity {Quantity}", productId, quantity);
             }
 
-            order.Price = 0; //calculate price from products
+            var productIdsAndQuantities = shoppingCartDto.ItemsAndQuantities
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            // Get address from user service
+            _logger.LogInformation("Requesting product reservation from InventoryService for OrderId: {OrderId}", order.OrderId);
+            var inventoryResponse = await _productClient.GetProductsAsync(productIdsAndQuantities, order.OrderId);
+
+            if (!inventoryResponse.Success)
+            {
+                _logger.LogError("Failed to reserve stock for OrderId: {OrderId}", order.OrderId);
+                throw new InvalidOperationException("Failed to reserve stock for some products.");
+            }
+
+            order.Price = inventoryResponse.GrpcProducts.Sum(p => (decimal)p.Price * productIdsAndQuantities[Guid.Parse(p.ProductId)]);
+            _logger.LogInformation("Calculated total order price for OrderId {OrderId}: {Price}", order.OrderId, order.Price);
+
+            order.Address = "some address"; // get from user service
+            _logger.LogInformation("Set order address for OrderId {OrderId}: {Address}", order.OrderId, order.Address);
 
             await _repo.AddAsync(order);
+            _logger.LogInformation("Order entity added to repository for OrderId {OrderId}", order.OrderId);
+
             await _repo.SaveChangesAsync();
+            _logger.LogInformation("Order saved to database for OrderId {OrderId}", order.OrderId);
 
             await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
+            _logger.LogInformation("Delivery created for OrderId {OrderId}", order.OrderId);
 
-            return OrderMapping.ToDto(order);
+            var orderDto = OrderMapping.ToDto(order);
+            _logger.LogInformation("Returning OrderDto for OrderId {OrderId}", order.OrderId);
+
+            return orderDto;
+        }
+
+        public async Task<bool> IsOrderPersisted(Guid id)
+        {
+            var order = await _repo.GetByIdAsync(id);
+            return order != null;
         }
         private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
         {
