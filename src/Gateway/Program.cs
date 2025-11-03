@@ -5,16 +5,17 @@ using Shared.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-       .AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<JwtHelper>(sp =>
 {
-       var config = sp.GetRequiredService<IConfiguration>();
-       return new JwtHelper(config);
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new JwtHelper(config);
 });
 
 builder.Services.AddReverseProxy()
@@ -37,7 +38,6 @@ app.Use(async (context, next) =>
         await next();
         return;
     }
-
 
     var jwtHelper = context.RequestServices.GetRequiredService<JwtHelper>();
     var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();

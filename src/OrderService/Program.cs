@@ -12,6 +12,19 @@ using API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.json", optional: true);
+builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true);
+builder.Configuration.AddEnvironmentVariables();
+
+string GetServiceUrl(string name, string defaultUrl) =>
+    Environment.GetEnvironmentVariable($"{name.ToUpper()}_URL") 
+    ?? builder.Configuration[$"ServiceUrls:{name}"] 
+    ?? defaultUrl;
+
+var deliveryServiceUrl = GetServiceUrl("Delivery", "http://localhost:7004");
+var userServiceUrl = GetServiceUrl("Users", "http://localhost:7003");
+var inventoryServiceUrl = GetServiceUrl("Inventory", "http://localhost:7001");
+
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
@@ -19,28 +32,31 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
 );
 
-
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddGrpc();
+
 builder.Services.AddGrpcClient<DeliveryService.GrpcGenerated.DeliveryService.DeliveryServiceClient>(o =>
 {
-    o.Address = new Uri("http://localhost:7004");
+    o.Address = new Uri(deliveryServiceUrl);
 });
-builder.Services.AddScoped<DeliveryGrpcClient>();
-
 builder.Services.AddGrpcClient<UserService.GrpcGenerated.UserService.UserServiceClient>(o =>
 {
-    o.Address = new Uri("http://localhost:7003");
+    o.Address = new Uri(userServiceUrl);
 });
+builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.ProductService.ProductServiceClient>(o =>
+{
+    o.Address = new Uri(inventoryServiceUrl);
+});
+
 builder.Services.AddScoped<UserGrpcClient>();
+builder.Services.AddScoped<ProductClient>();
+builder.Services.AddScoped<DeliveryGrpcClient>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenLocalhost(7002, listenOptions =>
@@ -48,14 +64,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
-=======
-// builder.WebHost.UseUrls("http://localhost:7002");
-builder.WebHost.UseUrls("http://0.0.0.0:7002");
->>>>>>> e989525 (Add Kubernetes local setup for InventoryService with Postgres)
-=======
-builder.WebHost.UseUrls("http://localhost:7002");
 
->>>>>>> 77c9f8b (WIP: K8s tweaks (Program.cs for URLs/ports))
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -11,9 +11,10 @@ using UserService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-       .AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -41,7 +42,6 @@ builder.Services.AddSingleton<JwtHelper>(sp =>
     return new JwtHelper(config);
 });
 
-<<<<<<< HEAD
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenLocalhost(7003, listenOptions =>
@@ -49,11 +49,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
-=======
-builder.WebHost.UseUrls("http://localhost:7003");
 
-
->>>>>>> e989525 (Add Kubernetes local setup for InventoryService with Postgres)
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -64,4 +60,5 @@ if (app.Environment.IsDevelopment())
 
 app.MapGrpcService<UserGrpcService>();
 app.MapControllers();
+
 app.Run();
