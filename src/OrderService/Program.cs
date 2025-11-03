@@ -12,9 +12,10 @@ using API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: true);
-builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true);
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration
+       .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+       .AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true)
+       .AddEnvironmentVariables();
 
 string GetServiceUrl(string name, string defaultUrl) =>
     Environment.GetEnvironmentVariable($"{name.ToUpper()}_URL") 
@@ -25,11 +26,14 @@ var deliveryServiceUrl = GetServiceUrl("Delivery", "http://localhost:7004");
 var userServiceUrl = GetServiceUrl("Users", "http://localhost:7003");
 var inventoryServiceUrl = GetServiceUrl("Inventory", "http://localhost:7001");
 
+var env = builder.Environment.EnvironmentName;
+string connectionString = env == "Production"
+    ? builder.Configuration.GetConnectionString("ProdConnection")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+    options.UseNpgsql(connectionString)
+           .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
 );
 
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();

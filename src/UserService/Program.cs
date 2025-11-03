@@ -11,13 +11,19 @@ using UserService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-builder.Configuration.AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
-builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true);
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration
+       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+       .AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true)
+       .AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true)
+       .AddEnvironmentVariables();
+
+var env = builder.Environment.EnvironmentName;
+string connectionString = env == "Production"
+    ? builder.Configuration.GetConnectionString("ProdConnection")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(connectionString)
 );
 
 builder.Services.AddControllers()

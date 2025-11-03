@@ -11,9 +11,10 @@ using InventoryService.Application.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: true);
-builder.Configuration.AddJsonFile("../Shared/appsettings.Production.json", optional: true);
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration
+       .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+       .AddJsonFile("../Shared/appsettings.Production.json", optional: true, reloadOnChange: true)
+       .AddEnvironmentVariables();
 
 string GetServiceUrl(string name, string defaultUrl) =>
     Environment.GetEnvironmentVariable($"{name.ToUpper()}_URL") 
@@ -22,17 +23,22 @@ string GetServiceUrl(string name, string defaultUrl) =>
 
 var orderServiceUrl = GetServiceUrl("Orders", "http://localhost:7002");
 
+var env = builder.Environment.EnvironmentName;
+string connectionString = env == "Production"
+    ? builder.Configuration.GetConnectionString("ProdConnection")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddControllers()
     .AddJsonOptions(opt =>
-        {
-            opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        });
+    {
+        opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ProductDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(connectionString)
 );
 
 builder.Services.AddGrpc();

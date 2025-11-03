@@ -1,3 +1,9 @@
+x-db-credentials: &db-credentials
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_USER: starlabs
+  DB_PASSWORD: bootcamp
+
 services:
   postgres:
     image: postgres:16
@@ -10,6 +16,72 @@ services:
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
+
+  gateway:
+    image: gateway-service:latest
+    container_name: gateway
+    ports:
+      - "7000:7000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    depends_on:
+      - postgres
+      - inventory
+      - orders
+      - users
+      - delivery
+
+  inventory:
+    image: inventory-service:latest
+    container_name: inventory
+    ports:
+      - "7001:7001"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: inventory_db
+    depends_on:
+      - postgres
+
+  orders:
+    image: orders-service:latest
+    container_name: orders
+    ports:
+      - "7002:7002"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: orders_db
+    depends_on:
+      - postgres
+      - delivery
+      - users
+      - inventory
+
+  users:
+    image: users-service:latest
+    container_name: users
+    ports:
+      - "7003:7003"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: users_db
+    depends_on:
+      - postgres
+
+  delivery:
+    image: delivery-service:latest
+    container_name: delivery
+    ports:
+      - "7004:7004"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: delivery_db
+    depends_on:
+      - postgres
+      - orders
 
 volumes:
   pgdata:
