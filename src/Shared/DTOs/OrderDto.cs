@@ -10,7 +10,6 @@ namespace Shared.DTOs.Order
         [Required]
         public Guid OrderId { get; set; }
 
-        // [Required(ErrorMessage = "UserId is required.")]
         public Guid UserId { get; set; }
 
         [Required(ErrorMessage = "Address is required.")]
@@ -25,9 +24,8 @@ namespace Shared.DTOs.Order
         public string Status { get; set; } = "OTHER";
 
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;     
 
-        [Required]
         public List<OrderItemDto> Items { get; set; } = new();
     }
 }

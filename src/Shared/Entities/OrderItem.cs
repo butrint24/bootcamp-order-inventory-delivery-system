@@ -18,7 +18,7 @@ namespace Shared.Entities
         public int Quantity { get; set; }
 
         [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public OrderItem() { }
 

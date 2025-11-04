@@ -56,10 +56,10 @@ namespace InventoryService.API.Grpc
                     };
                 }
 
-                // Decrease stock
+                
                 product.Stock -= request.Quantity;
 
-                // Update the product in DB
+                
                 var updateDto = new Shared.DTOs.ProductUpdateDto
                 {
                     Stock = product.Stock

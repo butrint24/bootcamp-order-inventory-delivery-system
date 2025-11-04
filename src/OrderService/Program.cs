@@ -27,13 +27,18 @@ builder.Services.AddGrpcClient<DeliveryService.GrpcGenerated.DeliveryService.Del
 {
     o.Address = new Uri("http://localhost:7004");
 });
-builder.Services.AddScoped<DeliveryGrpcClient>();
-
 builder.Services.AddGrpcClient<UserService.GrpcGenerated.UserService.UserServiceClient>(o =>
 {
     o.Address = new Uri("http://localhost:7003");
 });
+builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.ProductService.ProductServiceClient>(o =>
+{
+    o.Address = new Uri("http://localhost:7001");
+});
+
 builder.Services.AddScoped<UserGrpcClient>();
+builder.Services.AddScoped<ProductClient>();
+builder.Services.AddScoped<DeliveryGrpcClient>();
 
 builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.InventoryService.InventoryServiceClient>(o =>
 {

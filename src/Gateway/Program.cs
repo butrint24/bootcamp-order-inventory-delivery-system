@@ -17,6 +17,16 @@ builder.Services.AddSingleton<JwtHelper>(sp =>
        return new JwtHelper(config);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy.WithOrigins("http://localhost:5173") // ose porta që përdor Vite/Next
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+
+
+
 builder.Services.AddReverseProxy()
        .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 

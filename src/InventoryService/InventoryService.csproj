@@ -9,8 +9,14 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+<<<<<<< HEAD
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageReference Include="Grpc.Tools" Version="2.71.0">
+=======
+    <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
+>>>>>>> b9c84523d8771175bebb202f0752ba0c7f79d428
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -28,8 +34,13 @@
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
+<<<<<<< HEAD
   <ItemGroup>
     <Protobuf Include="..\Protos\*.proto" GrpcServices="Both" />
+=======
+   <ItemGroup>
+    <Protobuf Include="../Protos/*.proto" GrpcServices="Both" />
+>>>>>>> b9c84523d8771175bebb202f0752ba0c7f79d428
   </ItemGroup>
 
 </Project>

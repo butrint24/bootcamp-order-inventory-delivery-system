@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using InventoryService.API.Controllers.Mapping;
 using InventoryService.API.Grpc;
+using InventoryService.Application.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,20 +23,25 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+builder.Services.AddGrpc();
+
+builder.Services.AddGrpcClient<OrderService.GrpcGenerated.OrderService.OrderServiceClient>(o =>
+{
+    o.Address = new Uri("http://localhost:7002");
+});
+
+builder.Services.AddScoped<OrderGrpcClient>();  
+
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
-builder.Services.AddGrpc();
-
-builder.WebHost.UseUrls("http://localhost:7001");
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenLocalhost(7001, listenOptions =>
     {
-        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -44,6 +50,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapGrpcService<ProductGrpcService>();
 app.MapControllers();
 app.MapGrpcService<InventoryGrpcService>();
 
