@@ -35,6 +35,12 @@ builder.Services.AddGrpcClient<UserService.GrpcGenerated.UserService.UserService
 });
 builder.Services.AddScoped<UserGrpcClient>();
 
+builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.InventoryService.InventoryServiceClient>(o =>
+{
+    o.Address = new Uri("http://localhost:7001");
+});
+builder.Services.AddScoped<InventoryGrpcClient>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Shared.Enums;
 
@@ -25,5 +26,8 @@ namespace Shared.DTOs.Order
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public List<OrderItemDto> Items { get; set; } = new();
     }
 }

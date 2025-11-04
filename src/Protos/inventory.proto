@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "InventoryService.GrpcGenerated";
+
+package inventory;
+
+service InventoryService {
+    rpc DecreaseStock(DecreaseStockRequest) returns (DecreaseStockResponse);
+}
+
+message DecreaseStockRequest {
+    string product_id = 1;
+    int32 quantity = 2;
+}
+
+message DecreaseStockResponse {
+    bool success = 1;
+    string message = 2;
+}

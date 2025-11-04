@@ -18,12 +18,14 @@ namespace Application.Services.Implementations
         private readonly IOrderRepository _repo;
         private readonly DeliveryGrpcClient _deliveryClient;
         private readonly UserGrpcClient _userClient;
+        private readonly InventoryGrpcClient _inventoryClient;
 
-        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient)
+        public OrderService(IOrderRepository repo, DeliveryGrpcClient deliveryClient, UserGrpcClient userClient, InventoryGrpcClient inventoryClient)
         {
             _repo = repo;
             _deliveryClient = deliveryClient;
             _userClient = userClient;
+            _inventoryClient = inventoryClient;
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderDto dto, Guid userId)
@@ -38,11 +40,26 @@ namespace Application.Services.Implementations
 
             if (!Enum.IsDefined(typeof(OrderStatus), order.Status))
             {
-                order.Status = OrderStatus.PENDING; 
+                order.Status = OrderStatus.PENDING;
             }
 
             await _repo.AddAsync(order);
             await _repo.SaveChangesAsync();
+
+            // Decrease stock for each order item
+            if (order.Items != null && order.Items.Any())
+            {
+                foreach (var item in order.Items)
+                {
+                    var response = await _inventoryClient.DecreaseStockAsync(item.ProductId, item.Quantity);
+                    if (!response.Success)
+                    {
+                        // If stock decrease fails, we could implement rollback logic here
+                        // For now, we'll throw an exception
+                        throw new InvalidOperationException($"Failed to decrease stock for product {item.ProductId}: {response.Message}");
+                    }
+                }
+            }
 
             await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
 

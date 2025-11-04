@@ -2,10 +2,11 @@ using InventoryService.Infrastructure.Data;
 using InventoryService.Infrastructure.Repositories.Implementations;
 using InventoryService.Infrastructure.Repositories.Interfaces;
 using Application.Services.Implementations;
-using Application.Services.Interfaces;  
+using Application.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using InventoryService.API.Controllers.Mapping;
+using InventoryService.API.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,16 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(ProductProfile).Assembly);
+builder.Services.AddGrpc();
+
 builder.WebHost.UseUrls("http://localhost:7001");
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(7001, listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2;
+    });
+});
 
 var app = builder.Build();
 
@@ -35,5 +45,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+app.MapGrpcService<InventoryGrpcService>();
 
 app.Run();

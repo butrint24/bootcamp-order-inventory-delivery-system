@@ -10,11 +10,18 @@ namespace API.Mapping
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
-            return new Order(dto.UserId, dto.Address?.Trim() ?? string.Empty)
+            var order = new Order(dto.UserId, dto.Address?.Trim() ?? string.Empty)
             {
                 Price = dto.Price,
                 Status = ParseStatus(dto.Status)
             };
+
+            if (dto.Items != null && dto.Items.Any())
+            {
+                order.Items = dto.Items.Select(item => new OrderItem(order.OrderId, item.ProductId, item.Quantity)).ToList();
+            }
+
+            return order;
         }
 
         public static OrderDto ToDto(Order order)
@@ -28,7 +35,12 @@ namespace API.Mapping
                 Address = order.Address,
                 Price = order.Price,
                 Status = order.Status.ToString(),
-                CreatedAt = order.CreatedAt
+                CreatedAt = order.CreatedAt,
+                Items = order.Items?.Select(item => new OrderItemDto
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity
+                }).ToList() ?? new List<OrderItemDto>()
             };
         }
 
@@ -41,6 +53,12 @@ namespace API.Mapping
             order.Address = dto.Address?.Trim() ?? string.Empty;
             order.Price = dto.Price;
             order.Status = ParseStatus(dto.Status);
+
+            // Update items if provided
+            if (dto.Items != null)
+            {
+                order.Items = dto.Items.Select(item => new OrderItem(order.OrderId, item.ProductId, item.Quantity)).ToList();
+            }
         }
 
         private static OrderStatus ParseStatus(string? statusString)
