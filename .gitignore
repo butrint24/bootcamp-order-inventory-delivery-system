@@ -59,3 +59,8 @@ bin/
 obj/
 
 appsettings.Secrets.json
+
+*.log
+*.pid
+bootcamp-order-inventory-delivery-system.sln
+minikube-linux-amd64

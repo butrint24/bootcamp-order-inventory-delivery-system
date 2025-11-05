@@ -1,3 +1,9 @@
+x-db-credentials: &db-credentials
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_USER: starlabs
+  DB_PASSWORD: bootcamp
+
 services:
   postgres:
     image: postgres:16
@@ -10,6 +16,83 @@ services:
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - ecom-network
+
+  gateway:
+    image: gateway:latest
+    container_name: gateway
+    ports:
+      - "7000:7000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    networks:
+      - ecom-network
+
+  inventory-service:
+    image: inventory-service:latest
+    container_name: inventory
+    ports:
+      - "7001:7001"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: inventory_db
+    depends_on:
+      - postgres
+    networks:
+      - ecom-network
+
+  order-service:
+    image: order-service:latest
+    container_name: order
+    ports:
+      - "7002:7002"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: orders_db
+    depends_on:
+      - postgres
+      - inventory-service
+    networks:
+      - ecom-network
+
+  user-service:
+    image: user-service:latest
+    container_name: user
+    ports:
+      - "7003:7003"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: users_db
+    depends_on:
+      - postgres
+    networks:
+      - ecom-network
+
+  delivery-service:
+    image: delivery-service:latest
+    container_name: delivery
+    ports:
+      - "7004:7004"
+    environment:
+      <<: *db-credentials
+      ASPNETCORE_ENVIRONMENT: Production
+      DB_NAME: delivery_db
+      
+    depends_on:
+      - postgres
+      - order-service
+      - user-service
+    networks:
+      - ecom-network
+    
 
 volumes:
   pgdata:
+
+networks:
+  ecom-network:
+    driver: bridge

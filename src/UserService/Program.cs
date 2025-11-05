@@ -13,10 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-       .AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+       .AddJsonFile("appsettings.Secrets.json", optional: false, reloadOnChange: true)
+       .AddEnvironmentVariables();
+
+var env = builder.Environment.EnvironmentName;
+string connectionString = env == "Production"
+    ? builder.Configuration.GetConnectionString("ProdConnection")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(connectionString)
 );
 
 builder.Services.AddControllers()
@@ -43,11 +49,12 @@ builder.Services.AddSingleton<JwtHelper>(sp =>
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(7003, listenOptions =>
+    options.ListenAnyIP(7003, listenOptions =>
     {
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -58,4 +65,5 @@ if (app.Environment.IsDevelopment())
 
 app.MapGrpcService<UserGrpcService>();
 app.MapControllers();
+
 app.Run();
