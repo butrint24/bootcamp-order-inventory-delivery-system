@@ -19,7 +19,6 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
     .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
 );
 
-
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddGrpc();

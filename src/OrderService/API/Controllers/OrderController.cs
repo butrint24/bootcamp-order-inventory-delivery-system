@@ -3,6 +3,7 @@ using Application.Services.Interfaces;
 using Shared.DTOs.Order;
 using Shared.DTOs;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Shared.Attributes;
 using Shared.Enums;
@@ -85,6 +86,20 @@ namespace API.Controllers
             return NoContent();
         }
 
+        [HttpGet("user-orders")]
+        public async Task<IActionResult> GetUserOrders()
+        {
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var orders = await _service.GetOrdersForUserAsync(userId);
+
+            if (orders == null || !orders.Any())
+                return NotFound($"No orders found for user with ID {userId}");
+
+            return Ok(orders);
+        }
+
         [HttpPost("buy-cart")]
         public async Task<IActionResult> BuyCart([FromBody] ShoppingCartDto shoppingCartDto)
         {
@@ -92,6 +107,7 @@ namespace API.Controllers
                 return Forbid("Missing or invalid X-User-Id header.");
 
             var order = await _service.BuyCartAsync(shoppingCartDto, userId);
+
             if (order == null)
                 return Conflict("Failed to create order from shopping cart.");
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
@@ -100,10 +116,10 @@ namespace API.Controllers
         private bool TryGetUserId(out Guid userId)
         {
             userId = Guid.Empty;
-            if (!Request.Headers.TryGetValue("X-User-Id", out var header))
+            if (!Request.Headers.TryGetValue("X-User-Id", out var headerValue))
                 return false;
 
-            return Guid.TryParse(header, out userId);
+            return Guid.TryParse(headerValue, out userId);
         }
     }
 }

@@ -12,6 +12,7 @@ using API.Mapping;
 using OrderService.GrpcGenerated;
 using OrderService.Application.Clients;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Implementations
 {
@@ -36,16 +37,13 @@ namespace Application.Services.Implementations
         {
             var userValidation = await _userClient.ValidateUserAsync(userId, "");
             if (!userValidation.Validated)
-            {
                 throw new UnauthorizedAccessException("User is not authorized to create an order.");
-            }
+
             dto.UserId = userId;
             var order = OrderMapping.ToEntity(dto);
 
             if (!Enum.IsDefined(typeof(OrderStatus), order.Status))
-            {
-                order.Status = OrderStatus.PENDING; 
-            }
+                order.Status = OrderStatus.PENDING;
 
             await _repo.AddAsync(order);
             await _repo.SaveChangesAsync();
@@ -55,25 +53,11 @@ namespace Application.Services.Implementations
             return OrderMapping.ToDto(order);
         }
 
-        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)
-        {
-            var orders = await _repo.GetAllAsync(pageNumber, pageSize);
-            return orders.Select(OrderMapping.ToDto);
-        }
-
-        public async Task<OrderDto?> GetOrderByIdAsync(Guid id)
-        {
-            var order = await _repo.GetByIdAsync(id);
-            return order == null ? null : OrderMapping.ToDto(order);
-        }
-
         public async Task<OrderDto?> UpdateOrderAsync(Guid id, OrderDto dto, Guid userId)
         {
             var userValidation = await _userClient.ValidateUserAsync(userId, RoleType.Admin.ToString());
             if (!userValidation.Validated)
-            {
                 throw new UnauthorizedAccessException("User is not authorized to update this order.");
-            }
 
             var order = await _repo.GetByIdAsync(id);
             if (order == null) return null;
@@ -86,17 +70,32 @@ namespace Application.Services.Implementations
             return OrderMapping.ToDto(order);
         }
 
+        public async Task<OrderDto?> GetOrderByIdAsync(Guid id)
+        {
+            var order = await _repo.GetByIdAsync(id);
+            return order == null ? null : OrderMapping.ToDto(order);
+        }
+
+        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)
+        {
+            var orders = await _repo.GetAllAsync(pageNumber, pageSize);
+            return orders.Select(OrderMapping.ToDto);
+        }
+
+        public async Task<IEnumerable<OrderDto>> GetOrdersForUserAsync(Guid userId)
+        {
+            var orders = await _repo.GetByUserIdAsync(userId);
+            return orders.Select(OrderMapping.ToDto);
+        }
+
         public async Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(Guid id, OrderStatus status)
         {
             if (!Enum.IsDefined(typeof(OrderStatus), status))
-            {
                 throw new ArgumentException("Invalid order status.");
-            }
+
             var order = await _repo.GetByIdAsync(id);
             if (order == null)
-            {
                 throw new ArgumentException("Order not found.");
-            }
 
             order.Status = status;
             _repo.Update(order);
