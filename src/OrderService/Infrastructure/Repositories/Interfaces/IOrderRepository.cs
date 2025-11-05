@@ -7,6 +7,7 @@ namespace OrderService.Infrastructure.Repositories.Interfaces
 {
     public interface IOrderRepository
     {
+        Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId);
         Task AddAsync(Order order);
         Task<Order?> GetByIdAsync(Guid id);      
         Task<IEnumerable<Order>> GetAllAsync(int pageNumber, int pageSize);
