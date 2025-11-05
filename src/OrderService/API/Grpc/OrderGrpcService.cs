@@ -4,6 +4,7 @@ using OrderService.GrpcGenerated;
 using Shared.Enums;
 using System;
 using System.Threading.Tasks;
+using GrpcService = OrderService.GrpcGenerated.OrderService;
 
 namespace API.Grpc
 {

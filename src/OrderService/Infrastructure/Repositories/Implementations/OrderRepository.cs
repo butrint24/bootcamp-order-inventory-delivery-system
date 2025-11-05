@@ -18,6 +18,15 @@ namespace OrderService.Infrastructure.Repositories.Implementations
             _context = context;
         }
 
+        public async Task<IEnumerable<Order>> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task AddAsync(Order order)
         {
             order.CreatedAt = DateTime.Now;
