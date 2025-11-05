@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service
+  labels:
+    app: delivery-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery-service
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+    spec:
+      containers:
+        - name: delivery-service
+          image: delivery-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 7004
+          envFrom:
+            - configMapRef:
+                name: ecom-config
+          env:
+            - name: DB_NAME
+              value: "delivery_db"
