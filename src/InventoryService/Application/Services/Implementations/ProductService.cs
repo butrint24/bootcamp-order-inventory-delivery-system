@@ -137,6 +137,18 @@ namespace Application.Services.Implementations
             _repo.Update(product);
         }
 
+        public async Task<bool> RestockProductStockAsync(Guid productId, int quantity)
+        {
+            var product = await _repo.GetByIdAsync(productId);
+            if (product == null)
+                return false;
+
+            product.UpdateStock(product.Stock + quantity);
+            _repo.Update(product);
+            await _repo.SaveChangesAsync();
+            return true;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _repo.SaveChangesAsync();

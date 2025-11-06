@@ -25,5 +25,16 @@ namespace OrderService.Application.Clients
 
             return await _client.createDeliveryAsync(request);
         }
+
+        public async Task<bool> CancelDeliveryAsync(Guid orderId)
+        {
+            var request = new CancelDeliveryMessage
+            {
+                OrderId = orderId.ToString()
+            };
+
+            var response = await _client.CancelDeliveryAsync(request);
+            return response.Success;
+        }
     }
 }
