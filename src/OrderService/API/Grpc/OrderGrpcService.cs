@@ -1,6 +1,7 @@
 using Application.Services.Interfaces;
 using Grpc.Core;
 using OrderService.GrpcGenerated;
+using Shared.DTOs.Order;
 using Shared.Enums;
 using System;
 using System.Threading.Tasks;
@@ -31,6 +32,34 @@ namespace API.Grpc
             var response = await _orderService.UpdateOrderStatusAsync(orderId, updatedStatus);
 
             return response;
+        }
+
+        public override async Task<CreateOrderResponse> CreateOrderWithDelivery(CreateOrderRequest request, ServerCallContext context)
+        {
+            if (!Guid.TryParse(request.UserId, out var userId))
+            {
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid User ID format."));
+            }
+
+            var dto = new OrderDto
+            {
+                Address = request.Address,
+                Price = (decimal)request.Price,
+                Status = OrderStatus.PENDING.ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var order = await _orderService.CreateOrderWithDeliveryAsync(dto, userId);
+
+            return new CreateOrderResponse
+            {
+                OrderId = order.OrderId.ToString(),
+                UserId = order.UserId.ToString(),
+                Address = order.Address,
+                Price = (double)order.Price,
+                Status = order.Status,
+                CreatedAt = order.CreatedAt.ToString("o") // ISO 8601 format
+            };
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Application.Services.Implementations
 
             if (!Enum.IsDefined(typeof(OrderStatus), order.Status))
             {
-                order.Status = OrderStatus.PENDING; 
+                order.Status = OrderStatus.PENDING;
             }
 
             await _repo.AddAsync(order);
@@ -47,6 +47,11 @@ namespace Application.Services.Implementations
             await _deliveryClient.CreateDeliveryAsync(order.OrderId, order.UserId);
 
             return OrderMapping.ToDto(order);
+        }
+
+        public async Task<OrderDto> CreateOrderWithDeliveryAsync(OrderDto dto, Guid userId)
+        {
+            return await CreateOrderAsync(dto, userId);
         }
 
         public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync(int pageNumber = 1, int pageSize = 10)

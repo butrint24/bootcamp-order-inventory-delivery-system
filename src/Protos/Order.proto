@@ -6,6 +6,7 @@ package order;
 
 service OrderService {
     rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse);
+    rpc CreateOrderWithDelivery(CreateOrderRequest) returns (CreateOrderResponse);
 }
 
 message UpdateOrderStatusRequest {
@@ -16,4 +17,19 @@ message UpdateOrderStatusRequest {
 message UpdateOrderStatusResponse {
     string order_id = 1;
     string updated_status = 2;
+}
+
+message CreateOrderRequest {
+    string user_id = 1;
+    string address = 2;
+    double price = 3;
+}
+
+message CreateOrderResponse {
+    string order_id = 1;
+    string user_id = 2;
+    string address = 3;
+    double price = 4;
+    string status = 5;
+    string created_at = 6;
 }

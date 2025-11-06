@@ -29,6 +29,16 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
         }
 
+        [HttpPost("create-full")]
+        public async Task<IActionResult> CreateOrderWithDelivery([FromBody] OrderDto dto)
+        {
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var order = await _service.CreateOrderWithDeliveryAsync(dto, userId);
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
+        }
+
         [HttpPut("{id:guid}")]
         [AuthorizeRoleAttribute(RoleType.Admin)]
         public async Task<IActionResult> UpdateOrder(Guid id, [FromBody] OrderDto dto)
