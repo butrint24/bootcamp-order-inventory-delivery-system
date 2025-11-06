@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using OrderService.GrpcGenerated;
+using Shared.DTOs;
 using Shared.Entities;
 
 namespace InventoryService.Application.Clients
@@ -24,6 +27,24 @@ namespace InventoryService.Application.Clients
 
             var response = await _client.CheckOrderPersistenceAsync(request);
             return response.Persisted;
+        }
+
+        public async Task<List<OrderItemDto>> GetOrderItemsAsync(Guid orderId)
+        {
+            var request = new GetOrderItemsRequest
+            {
+                OrderId = orderId.ToString()
+            };
+
+            var response = await _client.GetOrderItemsAsync(request);
+            return response.Items.Select(item => new OrderItemDto
+            {
+                OrderItemId = Guid.Parse(item.OrderItemId),
+                OrderId = Guid.Parse(item.OrderId),
+                ProductId = Guid.Parse(item.ProductId),
+                Quantity = item.Quantity,
+                CreatedAt = DateTime.Parse(item.CreatedAt)
+            }).ToList();
         }
     }
 }

@@ -6,6 +6,7 @@ package ProductGrpc;
 
 service ProductService {
     rpc BuyProducts(BuyProductsMessage) returns (GetProductsResponse);
+    rpc ReduceStockForOrder(ReduceStockForOrderRequest) returns (ReduceStockForOrderResponse);
 }
 
 message BuyProductsMessage {
@@ -21,5 +22,14 @@ message GrpcProduct {
 
 message GetProductsResponse {
     repeated GrpcProduct grpcProducts = 1;
+    bool success = 2;
+}
+
+message ReduceStockForOrderRequest {
+    string order_id = 1;
+}
+
+message ReduceStockForOrderResponse {
+    repeated GrpcProduct reserved_products = 1;
     bool success = 2;
 }

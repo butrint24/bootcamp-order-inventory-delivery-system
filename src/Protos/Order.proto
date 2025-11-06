@@ -7,6 +7,7 @@ package order;
 service OrderService {
     rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse);
     rpc CheckOrderPersistence(PersistenceCheck) returns (PersistenceResponse);
+    rpc GetOrderItems(GetOrderItemsRequest) returns (GetOrderItemsResponse);
 }
 
 message UpdateOrderStatusRequest {
@@ -25,4 +26,20 @@ message PersistenceCheck{
 
 message PersistenceResponse{
     bool persisted = 1;
+}
+
+message GetOrderItemsRequest {
+    string order_id = 1;
+}
+
+message GetOrderItemsResponse {
+    repeated OrderItem items = 1;
+}
+
+message OrderItem {
+    string order_item_id = 1;
+    string order_id = 2;
+    string product_id = 3;
+    int32 quantity = 4;
+    string created_at = 5;
 }

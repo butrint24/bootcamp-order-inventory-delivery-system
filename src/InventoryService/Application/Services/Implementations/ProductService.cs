@@ -13,15 +13,17 @@ namespace Application.Services.Implementations
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _repo;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ProductService> _logger;
+    private readonly IProductRepository _repo;
+    private readonly IMapper _mapper;
+    private readonly ILogger<ProductService> _logger;
+    private readonly OrderGrpcClient _orderClient;
 
-        public ProductService(IProductRepository repo, IMapper mapper, ILogger<ProductService> logger)
+        public ProductService(IProductRepository repo, IMapper mapper, ILogger<ProductService> logger, OrderGrpcClient orderClient)
         {
             _repo = repo;
             _mapper = mapper;
             _logger = logger;
+            _orderClient = orderClient;
         }
 
         public async Task<ProductResponseDto> CreateProductAsync(ProductCreateDto dto)
@@ -125,6 +127,20 @@ namespace Application.Services.Implementations
                 BoughtStock = quantity,
                 Price = (double)product.Price
             };
+        }
+
+        public async Task<List<GrpcProduct>> ReduceStockForOrderAsync(Guid orderId)
+        {
+            var orderItems = await _orderClient.GetOrderItemsAsync(orderId);
+            var reservedProducts = new List<GrpcProduct>();
+
+            foreach (var item in orderItems)
+            {
+                var reservedProduct = await ReserveProductStock(item.ProductId, item.Quantity);
+                reservedProducts.Add(reservedProduct);
+            }
+
+            return reservedProducts;
         }
 
         public async Task RollbackProductStockAsync(Guid productId, int quantity)
