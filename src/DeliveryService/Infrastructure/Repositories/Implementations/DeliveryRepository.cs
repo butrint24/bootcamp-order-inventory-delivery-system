@@ -174,5 +174,12 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
             return await _context.Deliveries
                 .FirstOrDefaultAsync(d => d.OrderId == orderId && d.IsActive);
         }
+
+        public async Task<List<Delivery>> GetDeliveriesByUserIdAsync(Guid userId)
+        {
+            return await _context.Deliveries
+                .Where(d => d.UserId == userId && d.IsActive)
+                .ToListAsync();
+        }
     }
 }

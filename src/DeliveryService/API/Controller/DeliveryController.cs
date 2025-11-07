@@ -98,6 +98,16 @@ namespace DeliveryService.API.Controller
             var restored = await _service.RestoreAsync(id);
             return restored ? Ok() : NotFound();
         }
+
+        [HttpGet("my-deliveries")]
+        public async Task<IActionResult> GetMyDeliveries()
+        {
+            if (!TryGetUserId(out var userId))
+                return Forbid("Missing or invalid X-User-Id header.");
+
+            var deliveries = await _service.GetDeliveriesByUserIdAsync(userId);
+            return Ok(deliveries);
+        }
         private bool TryGetUserId(out Guid userId)
         {
             userId = Guid.Empty;

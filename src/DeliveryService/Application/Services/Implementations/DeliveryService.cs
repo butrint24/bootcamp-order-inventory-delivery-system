@@ -208,6 +208,12 @@ namespace DeliveryService.Application.Services.Implementations
             return true;
         }
 
+        public async Task<List<DeliveryResponseDto>> GetDeliveriesByUserIdAsync(Guid userId)
+        {
+            var deliveries = await _repo.GetDeliveriesByUserIdAsync(userId);
+            return deliveries.Select(d => _mapper.Map<DeliveryResponseDto>(d)).ToList();
+        }
+
 
     }
 }
