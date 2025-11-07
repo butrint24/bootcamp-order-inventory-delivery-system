@@ -182,7 +182,7 @@ namespace DeliveryService.Application.Services.Implementations
                 if (pendingCount < remainingSlotsToday)
                     daysToWait = 0;
                 else
-                    daysToWait = (pendingCount - remainingSlotsToday) / dailyCapacity + 
+                    daysToWait = (pendingCount - remainingSlotsToday) / dailyCapacity +
                                 ((pendingCount - remainingSlotsToday) % dailyCapacity != 0 ? 1 : 0);
             }
             else
@@ -194,6 +194,18 @@ namespace DeliveryService.Application.Services.Implementations
                             .AddDays(daysToWait);
 
             return eta;
+        }
+
+        public async Task<bool> CancelDeliveryGrpcAsync(Guid orderId)
+        {
+            Delivery? delivery = await _repo.GetByOrderIdAsync(orderId);
+            if (delivery == null)
+                return false;
+            if (delivery.Status == DeliveryStatus.DELIVERED.ToString() || delivery.Status == DeliveryStatus.CANCELED.ToString())
+                return false;
+            delivery.MarkCanceled();
+            await _repo.SaveChangesAsync();
+            return true;
         }
 
 

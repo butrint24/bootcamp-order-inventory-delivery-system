@@ -21,14 +21,14 @@ string GetServiceUrl(string name, string defaultUrl) =>
     ?? builder.Configuration[$"ServiceUrls:{name}"] 
     ?? defaultUrl;
 
-var deliveryServiceUrl = GetServiceUrl("Delivery", "http://localhost:7004");
-var userServiceUrl = GetServiceUrl("User", "http://localhost:7003");
-var inventoryServiceUrl = GetServiceUrl("Inventory", "http://localhost:7001");
-
 var env = builder.Environment.EnvironmentName;
 string connectionString = env == "Production"
     ? builder.Configuration.GetConnectionString("ProdConnection")
     : builder.Configuration.GetConnectionString("DefaultConnection");
+
+var deliveryServiceUrl = env == "Production" ? GetServiceUrl("Delivery", "http://localhost:7004") : "http://localhost:7004";
+var userServiceUrl = env == "Production" ? GetServiceUrl("User", "http://localhost:7003") : "http://localhost:7003";
+var inventoryServiceUrl = env == "Production" ? GetServiceUrl("Inventory", "http://localhost:7001") : "http://localhost:7001";
 
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseNpgsql(connectionString)

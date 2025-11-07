@@ -19,5 +19,7 @@ namespace Application.Services.Interfaces
         Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(Guid id, OrderStatus status);
         Task<OrderDto?> BuyCartAsync(ShoppingCartDto shoppingCartDto, Guid userId);
         Task<bool> IsOrderPersisted(Guid id);
+        Task<bool> CancelOrderAsync(Guid id, Guid userId);
+        Task<bool> IsOrderCanceledAsync(Guid id);
     }
 }

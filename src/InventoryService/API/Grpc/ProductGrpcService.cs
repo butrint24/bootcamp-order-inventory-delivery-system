@@ -101,5 +101,62 @@ namespace InventoryService.API.Grpc
             }
         }
 
+        public override async Task<RestockProductsResponse> RestockProducts(RestockProductsMessage request, ServerCallContext context)
+        {
+            bool allSucceeded = true;
+            foreach (var (productId, quantity) in request.IdsAndQuantities)
+            {
+                try
+                {
+                    var result = await _productService.RestockProductStockAsync(Guid.Parse(productId), quantity);
+                    if (!result)
+                    {
+                        _logger.LogWarning("Failed to restock ProductId: {ProductId}, Quantity: {Quantity}", productId, quantity);
+                        allSucceeded = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error while restocking ProductId: {ProductId}", productId);
+                    allSucceeded = false;
+                }
+            }
+
+            var response = new RestockProductsResponse { Success = allSucceeded };
+
+            _ = Task.Run(() => CheckOrderCancelation(Guid.Parse(request.OrderId), request));
+
+            return response;
+        }
+
+        private async Task CheckOrderCancelation(Guid orderId, RestockProductsMessage reservedProducts)
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var productService = scope.ServiceProvider.GetRequiredService<IProductService>();
+
+            try
+            {
+                await Task.Delay(2000);
+                var isCanceled = await _orderClient.IsOrderCanceledAsync(orderId);
+
+                if (!isCanceled)
+                {
+                    foreach (var (productId, quantity) in reservedProducts.IdsAndQuantities)
+                        await productService.RollbackProductStockAsync(Guid.Parse(productId), quantity);
+
+                    await productService.SaveChangesAsync();
+                }
+
+                _logger.LogInformation("Order {OrderId} canceled: {IsCanceled}", orderId, isCanceled);
+            }
+            catch (Exception ex)
+            {
+                foreach (var (productId, quantity) in reservedProducts.IdsAndQuantities)
+                    await productService.RollbackProductStockAsync(Guid.Parse(productId), quantity);
+
+                await productService.SaveChangesAsync();
+                _logger.LogError(ex, "Order cancelation check failed for OrderId: {OrderId}", orderId);
+            }
+        }
     }
 }

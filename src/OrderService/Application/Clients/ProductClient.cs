@@ -48,5 +48,35 @@ namespace OrderService.Application.Clients
 
             return response;
         }
+
+        public async Task<RestockProductsResponse> RestockProductsAsync(Dictionary<Guid, int> productIdsAndQuantities, Guid orderId)
+        {
+            var request = new RestockProductsMessage
+            {
+                OrderId = orderId.ToString()
+            };
+
+            request.IdsAndQuantities.Clear();
+
+            foreach (var kvp in productIdsAndQuantities)
+            {
+                request.IdsAndQuantities.Add(kvp.Key.ToString(), kvp.Value);
+            }
+
+            RestockProductsResponse response;
+            try
+            {
+                response = await _client.RestockProductsAsync(request);
+                _logger.LogInformation("Received restock response for OrderId: {OrderId}, Success: {Success}",
+                    orderId, response.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while calling RestockProducts for OrderId: {OrderId}", orderId);
+                throw;
+            }
+
+            return response;
+        }
     }
 }

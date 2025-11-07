@@ -20,12 +20,12 @@ string GetServiceUrl(string name, string defaultUrl) =>
     ?? builder.Configuration[$"ServiceUrls:{name}"] 
     ?? defaultUrl;
 
-var orderServiceUrl = GetServiceUrl("Order", "http://localhost:7002");
-
 var env = builder.Environment.EnvironmentName;
 string connectionString = env == "Production"
     ? builder.Configuration.GetConnectionString("ProdConnection")
     : builder.Configuration.GetConnectionString("DefaultConnection");
+
+var orderServiceUrl = env == "Production" ? GetServiceUrl("Order", "http://localhost:7002") : "http://localhost:7002";
 
 builder.Services.AddControllers()
     .AddJsonOptions(opt =>

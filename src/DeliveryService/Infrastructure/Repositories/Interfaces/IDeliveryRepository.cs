@@ -29,5 +29,6 @@ namespace DeliveryService.Infrastructure.Repositories.Interfaces
         Task<List<Delivery>> GetNextOnRouteDeliveriesAsync(int count);
         Task<int> GetPendingCountAsync();
         Task<int> GetProcessedCountForDateAsync(DateTime date);
+        Task<Delivery?> GetByOrderIdAsync(Guid orderId);
     }
 }

@@ -186,6 +186,53 @@ namespace Application.Services.Implementations
             var order = await _repo.GetByIdAsync(id);
             return order != null;
         }
+
+        public async Task<bool> CancelOrderAsync(Guid id, Guid userId)
+        {
+            var order = await _repo.GetByIdAsync(id);
+            if (order == null) return false;
+
+            if (order.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("User is not authorized to cancel this order.");
+            }
+
+            if (order.Status != OrderStatus.PENDING && order.Status != OrderStatus.PROCESSING)
+            {
+                throw new InvalidOperationException("Order cannot be canceled.");
+            }
+
+            order.Status = OrderStatus.CANCELLED;
+            _repo.Update(order);
+            await _repo.SaveChangesAsync();
+
+            Dictionary<Guid, int> productsToRestock = new Dictionary<Guid, int>();
+            foreach (var item in order.Items)
+            {
+                productsToRestock[item.ProductId] = item.Quantity;
+            }
+
+            var response = await _productClient.RestockProductsAsync(productsToRestock, order.OrderId);
+            if (!response.Success)
+                _logger.LogWarning("Failed to restock products for canceled OrderId: {OrderId}", order.OrderId);
+
+            else
+            {
+                await _deliveryClient.CancelDeliveryAsync(order.OrderId);
+            }
+            return true;
+        }
+
+        public async Task<bool> IsOrderCanceledAsync(Guid id)
+        {
+            var order = await _repo.GetByIdAsync(id);
+            if (order == null)
+            {
+                throw new ArgumentException("Order not found.");
+            }
+
+            return order.Status == OrderStatus.CANCELLED;
+        }
         private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
         {
             return new OrderItem
