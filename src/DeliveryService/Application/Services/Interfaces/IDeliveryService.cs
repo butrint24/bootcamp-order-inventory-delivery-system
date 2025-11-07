@@ -31,5 +31,6 @@ namespace DeliveryService.Application.Services.Interfaces
         Task ProcessDeliveriesToProcessAsync();
         Task ProcessOnRouteDeliveriesAsync();
         Task<bool> CancelDeliveryGrpcAsync(Guid orderId);
+        Task<List<DeliveryResponseDto>> GetDeliveriesByUserIdAsync(Guid userId);
     }
 }
