@@ -1,4 +1,3 @@
-// lib/api-client.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:7000";
@@ -10,7 +9,6 @@ export const apiClient: AxiosInstance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// ---- REQUEST INTERCEPTOR: Bearer + X-User-Id ----
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("access_token") || localStorage.getItem("token");
@@ -18,33 +16,29 @@ apiClient.interceptors.request.use((config) => {
       config.headers = config.headers ?? {};
       (config.headers as any).Authorization = `Bearer ${token}`;
     }
-    try {
-      const raw = localStorage.getItem("user");
-      const u = raw ? JSON.parse(raw) : null;
-      const userId = u?.id || u?.userId || u?.UserId;
-      if (userId) (config.headers as any)["X-User-Id"] = userId;
-    } catch { /* ignore */ }
   }
   return config;
 });
 
-// ---- RESPONSE INTERCEPTOR: refresh-once në 401 (opsionale, si e ke) ----
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as RetriableAxiosRequestConfig;
+
     if (!error.response || error.response.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
+
     originalRequest._retry = true;
 
     try {
       const refreshToken =
         (typeof window !== "undefined" &&
           (localStorage.getItem("refresh_token") || localStorage.getItem("refreshToken"))) || null;
+
       if (!refreshToken) throw new Error("No refresh token");
 
-      const refreshUrl = `${API_BASE_URL}/api/account/refresh`; // ndrysho nëse ke tjetër rrugë
+      const refreshUrl = `${API_BASE_URL}/api/Auth/refresh`; 
       const res = await axios.post(refreshUrl, { refreshToken });
 
       const access =
@@ -60,8 +54,10 @@ apiClient.interceptors.response.use(
         localStorage.setItem("refresh_token", newRefresh);
         localStorage.setItem("refreshToken", newRefresh);
       }
+
       originalRequest.headers = originalRequest.headers ?? {};
       (originalRequest.headers as any).Authorization = `Bearer ${access}`;
+
       return apiClient(originalRequest);
     } catch {
       if (typeof window !== "undefined") {
