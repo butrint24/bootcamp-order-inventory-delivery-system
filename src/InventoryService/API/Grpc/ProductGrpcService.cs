@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Application.Services.Interfaces;
-using Shared.DTOs;
 using InventoryService.GrpcGenerated;
 using InventoryService.Application.Clients;
-using Microsoft.Extensions.Logging;
 
 namespace InventoryService.API.Grpc
 {
-    public class ProductGrpcService : InventoryService.GrpcGenerated.ProductService.ProductServiceBase
+    public class ProductGrpcService : ProductService.ProductServiceBase
     {
         private readonly IProductService _productService;
         private readonly OrderGrpcClient _orderClient;
@@ -21,8 +21,7 @@ namespace InventoryService.API.Grpc
             IProductService productService,
             OrderGrpcClient orderClient,
             ILogger<ProductGrpcService> logger,
-            IServiceScopeFactory serviceScopeFactory
-            )
+            IServiceScopeFactory serviceScopeFactory)
         {
             _productService = productService;
             _orderClient = orderClient;
@@ -69,6 +68,36 @@ namespace InventoryService.API.Grpc
             _ = Task.Run(() => ConfirmOrRollbackAsync(Guid.Parse(request.OrderId), reservedProducts));
 
             return response;
+        }
+
+        public override async Task<RollbackProductsResponse> RollbackProducts(RollbackProductsMessage request, ServerCallContext context)
+        {
+            try
+            {
+                foreach (var (productId, quantity) in request.IdsAndQuantities)
+                {
+                    await _productService.RollbackProductStockAsync(Guid.Parse(productId), quantity);
+                }
+
+                await _productService.SaveChangesAsync();
+
+                _logger.LogInformation("Rollback successful for products: {Products}", string.Join(", ", request.IdsAndQuantities.Keys));
+
+                return new RollbackProductsResponse
+                {
+                    Success = true,
+                    Message = "Products successfully returned"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to rollback products: {Products}", string.Join(", ", request.IdsAndQuantities.Keys));
+                return new RollbackProductsResponse
+                {
+                    Success = false,
+                    Message = "Failed to process return due to an internal error"
+                };
+            }
         }
 
         private async Task ConfirmOrRollbackAsync(Guid orderId, List<GrpcProduct> reservedProducts)

@@ -6,6 +6,7 @@ package ProductGrpc;
 
 service ProductService {
     rpc BuyProducts(BuyProductsMessage) returns (GetProductsResponse);
+    rpc RollbackProducts(RollbackProductsMessage) returns (RollbackProductsResponse);
     rpc RestockProducts(RestockProductsMessage) returns (RestockProductsResponse);
 }
 
@@ -25,6 +26,14 @@ message GetProductsResponse {
     bool success = 2;
 }
 
+message RollbackProductsMessage {
+    map<string, int32> idsAndQuantities = 1;
+}
+
+message RollbackProductsResponse {
+    bool success = 1;
+    string message = 2;
+}
 message RestockProductsMessage {
     map<string, int32> idsAndQuantities = 1;
     string orderId = 2;
