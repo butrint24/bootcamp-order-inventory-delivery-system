@@ -254,7 +254,7 @@ namespace Application.Services.Implementations
                 return new ReturnOrderResponse { Success = false, Message = "Order not found." };
             }
 
-            var userValidation = await _userClient.ValidateUserAsync(userId, RoleType.Admin.ToString());
+            var userValidation = await _userClient.ValidateUserAsync(userId, "");
             if (order.UserId != userId && !userValidation.Validated)
             {
                 _logger.LogWarning("Authorization failed: User {UserId} cannot return order {OrderId}.", userId, orderId);
