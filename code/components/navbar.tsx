@@ -39,6 +39,9 @@ export function Navbar() {
                   <Link href="/admin/orders" className="text-sm hover:text-primary">
                     Orders
                   </Link>
+                  <Link href="/admin/deliveries" className="text-sm hover:text-primary">
+                    Deliveries
+                  </Link>
                 </>
               ) : (
                 <>
