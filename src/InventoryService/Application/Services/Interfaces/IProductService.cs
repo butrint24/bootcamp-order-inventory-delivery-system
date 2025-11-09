@@ -29,7 +29,6 @@ namespace Application.Services.Interfaces
         Task<bool> RestoreAsync(Guid id);
         Task<GrpcProduct> ReserveProductStock(Guid productId, int quantity);
         Task RollbackProductStockAsync(Guid productId, int quantity);
-        Task<bool> RestockProductStockAsync(Guid productId, int quantity);
         Task SaveChangesAsync();
     }
 }

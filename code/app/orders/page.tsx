@@ -219,6 +219,22 @@ export default function OrdersPage() {
             <h1 className="text-3xl font-bold">My Orders</h1>
             <p className="text-muted-foreground">View and manage your orders</p>
           </div>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild><Button>Create New Order</Button></DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Order</DialogTitle>
+                <DialogDescription>Zgjidh produktet dhe dërgo porosinë</DialogDescription>
+              </DialogHeader>
+              <CreateOrderBox
+                onCreated={() => {
+                  setDialogOpen(false);
+                  fetchOrders();
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
         {loading ? (

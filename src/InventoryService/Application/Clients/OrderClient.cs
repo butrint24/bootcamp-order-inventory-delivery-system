@@ -25,16 +25,5 @@ namespace InventoryService.Application.Clients
             var response = await _client.CheckOrderPersistenceAsync(request);
             return response.Persisted;
         }
-
-        public async Task<bool> IsOrderCanceledAsync(Guid orderId)
-        {
-            var request = new CancelationCheck
-            {
-                OrderId = orderId.ToString()
-            };
-
-            var response = await _client.CheckOrderCancelationAsync(request);
-            return response.Canceled;
-        }
     }
 }

@@ -45,18 +45,5 @@ namespace API.Grpc
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid Order ID format."));
             }
         }
-
-        public override async Task<CancelationResponse> CheckOrderCancelation(CancelationCheck request, ServerCallContext context)
-        {
-            try
-            {
-                var isCanceled = await _orderService.IsOrderCanceledAsync(Guid.Parse(request.OrderId));
-                return new CancelationResponse { Canceled = isCanceled };
-            }
-            catch (FormatException)
-            {
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid Order ID format."));
-            }
-        }
     }
 }

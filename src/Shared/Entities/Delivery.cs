@@ -73,13 +73,6 @@ namespace Shared.Entities
             Status = "DELIVERED";
         }
 
-        public void MarkCanceled()
-        {
-            if (Status == "DELIVERED")
-                throw new InvalidOperationException("Delivered deliveries cannot be canceled.");
-            Status = "CANCELED";
-        }
-
         public void UpdateEta(DateTime newEta)
         {
             if (newEta < DateTime.UtcNow)

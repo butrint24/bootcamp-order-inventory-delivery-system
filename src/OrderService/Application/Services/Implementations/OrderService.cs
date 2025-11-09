@@ -186,53 +186,6 @@ namespace Application.Services.Implementations
             var order = await _repo.GetByIdAsync(id);
             return order != null;
         }
-
-        public async Task<bool> CancelOrderAsync(Guid id, Guid userId)
-        {
-            var order = await _repo.GetByIdAsync(id);
-            if (order == null) return false;
-
-            if (order.UserId != userId)
-            {
-                throw new UnauthorizedAccessException("User is not authorized to cancel this order.");
-            }
-
-            if (order.Status != OrderStatus.PENDING && order.Status != OrderStatus.PROCESSING)
-            {
-                throw new InvalidOperationException("Order cannot be canceled.");
-            }
-
-            order.Status = OrderStatus.CANCELLED;
-            _repo.Update(order);
-            await _repo.SaveChangesAsync();
-
-            Dictionary<Guid, int> productsToRestock = new Dictionary<Guid, int>();
-            foreach (var item in order.Items)
-            {
-                productsToRestock[item.ProductId] = item.Quantity;
-            }
-
-            var response = await _productClient.RestockProductsAsync(productsToRestock, order.OrderId);
-            if (!response.Success)
-                _logger.LogWarning("Failed to restock products for canceled OrderId: {OrderId}", order.OrderId);
-
-            else
-            {
-                await _deliveryClient.CancelDeliveryAsync(order.OrderId);
-            }
-            return true;
-        }
-
-        public async Task<bool> IsOrderCanceledAsync(Guid id)
-        {
-            var order = await _repo.GetByIdAsync(id);
-            if (order == null)
-            {
-                throw new ArgumentException("Order not found.");
-            }
-
-            return order.Status == OrderStatus.CANCELLED;
-        }
         private OrderItem CreateOrderItemEntity(Guid orderId, Guid productId, int quantity)
         {
             return new OrderItem
@@ -243,5 +196,71 @@ namespace Application.Services.Implementations
             };
         }
 
+        public async Task<ReturnOrderResponse> ReturnOrderAsync(Guid orderId, Guid userId)
+        {
+            _logger.LogInformation("Attempting to return order {OrderId} for user {UserId}", orderId, userId);
+
+            var order = await _repo.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                _logger.LogWarning("Return failed: Order {OrderId} not found.", orderId);
+                return new ReturnOrderResponse { Success = false, Message = "Order not found." };
+            }
+
+            var userValidation = await _userClient.ValidateUserAsync(userId, RoleType.Admin.ToString());
+            if (order.UserId != userId && !userValidation.Validated)
+            {
+                _logger.LogWarning("Authorization failed: User {UserId} cannot return order {OrderId}.", userId, orderId);
+                return new ReturnOrderResponse { Success = false, Message = "Not authorized to return this order." };
+            }
+
+            if (order.Status == OrderStatus.RETURNED)
+            {
+                _logger.LogWarning("Return failed: Order {OrderId} has already been returned.", orderId);
+                return new ReturnOrderResponse { Success = false, Message = "This order has already been returned." };
+            }
+
+            if (order.Status != OrderStatus.DELIVERED && order.Status != OrderStatus.COMPLETED)
+            {
+                _logger.LogWarning("Return failed: Order {OrderId} is in status {Status}, which is not returnable.", orderId, order.Status);
+                return new ReturnOrderResponse { Success = false, Message = "Order cannot be returned at this stage." };
+            }
+
+            var originalStatus = order.Status;
+
+            try
+            {
+                order.Status = OrderStatus.RETURNED;
+                _repo.Update(order);
+                await _repo.SaveChangesAsync();
+                _logger.LogInformation("Order {OrderId} status updated to RETURNED in the database.", orderId);
+
+                var productIdsAndQuantities = order.Items.ToDictionary(i => i.ProductId, i => i.Quantity);
+                await _productClient.RollbackProductsAsync(productIdsAndQuantities);
+                _logger.LogInformation("Inventory rollback successful for order {OrderId}.", orderId);
+
+                return new ReturnOrderResponse
+                {
+                    Success = true,
+                    Message = "Order returned successfully.",
+                    OrderId = orderId.ToString(),
+                    UpdatedStatus = OrderStatus.RETURNED.ToString()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to process return for order {OrderId}. Reverting order status.", orderId);
+
+                order.Status = originalStatus;
+                _repo.Update(order);
+                await _repo.SaveChangesAsync();
+
+                return new ReturnOrderResponse
+                {
+                    Success = false,
+                    Message = "Failed to process return due to an external inventory service error. Please try again later."
+                };
+            }
+        }
     }
 }

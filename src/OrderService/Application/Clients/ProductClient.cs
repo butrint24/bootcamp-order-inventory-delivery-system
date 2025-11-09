@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Grpc.Net.Client;
-using Shared.DTOs;
 using InventoryService.GrpcGenerated;
 using Microsoft.Extensions.Logging;
 
@@ -33,50 +31,42 @@ namespace OrderService.Application.Clients
                 request.IdsAndQuantities.Add(kvp.Key.ToString(), kvp.Value);
             }
 
-            GetProductsResponse response;
             try
             {
-                response = await _client.BuyProductsAsync(request);
+                var response = await _client.BuyProductsAsync(request);
                 _logger.LogInformation("Received response for OrderId: {OrderId}, Success: {Success}, ProductsCount: {Count}",
                     orderId, response.Success, response.GrpcProducts.Count);
+                return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while calling GetProducts for OrderId: {OrderId}", orderId);
+                _logger.LogError(ex, "Error while calling BuyProducts for OrderId: {OrderId}", orderId);
                 throw;
             }
-
-            return response;
         }
 
-        public async Task<RestockProductsResponse> RestockProductsAsync(Dictionary<Guid, int> productIdsAndQuantities, Guid orderId)
+        public async Task RollbackProductsAsync(Dictionary<Guid, int> productIdsAndQuantities)
         {
-            var request = new RestockProductsMessage
-            {
-                OrderId = orderId.ToString()
-            };
-
-            request.IdsAndQuantities.Clear();
+            var request = new RollbackProductsMessage(); // FIX: Use correct message type
 
             foreach (var kvp in productIdsAndQuantities)
             {
                 request.IdsAndQuantities.Add(kvp.Key.ToString(), kvp.Value);
             }
 
-            RestockProductsResponse response;
             try
             {
-                response = await _client.RestockProductsAsync(request);
-                _logger.LogInformation("Received restock response for OrderId: {OrderId}, Success: {Success}",
-                    orderId, response.Success);
+                var response = await _client.RollbackProductsAsync(request);
+                if (!response.Success)
+                    throw new Exception($"Failed to rollback products: {response.Message}");
+
+                _logger.LogInformation("Rollback successful for {Count} products", productIdsAndQuantities.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while calling RestockProducts for OrderId: {OrderId}", orderId);
+                _logger.LogError(ex, "Error during product rollback");
                 throw;
             }
-
-            return response;
         }
     }
 }

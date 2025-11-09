@@ -157,7 +157,7 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
             return await _context.Deliveries
                 .Where(d => d.Status == DeliveryStatus.PENDING.ToString() && d.IsActive)
                 .CountAsync();
-        }
+        }  
 
         public async Task<int> GetProcessedCountForDateAsync(DateTime date)
         {
@@ -167,19 +167,6 @@ namespace DeliveryService.Infrastructure.Repositories.Implementations
                             && d.IsActive
                             && d.UpdatedAt.Date == date.Date) // assuming UpdatedAt tracks status changes
                 .CountAsync();
-        }
-
-        public async Task<Delivery?> GetByOrderIdAsync(Guid orderId)
-        {
-            return await _context.Deliveries
-                .FirstOrDefaultAsync(d => d.OrderId == orderId && d.IsActive);
-        }
-
-        public async Task<List<Delivery>> GetDeliveriesByUserIdAsync(Guid userId)
-        {
-            return await _context.Deliveries
-                .Where(d => d.UserId == userId && d.IsActive)
-                .ToListAsync();
-        }
+        } 
     }
 }

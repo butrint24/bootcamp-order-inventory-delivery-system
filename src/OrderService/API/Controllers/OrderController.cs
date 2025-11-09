@@ -113,20 +113,18 @@ namespace API.Controllers
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, order);
         }
 
-        [HttpPost("cancel-order/{id:guid}")]
-        public async Task<IActionResult> CancelOrder(Guid id)
+        [HttpPost("return-order/{orderId}")]
+        public async Task<IActionResult> ReturnOrder(Guid orderId)
         {
-            if (id == Guid.Empty)
-                return BadRequest("Invalid order ID.");
-
             if (!TryGetUserId(out var userId))
                 return Forbid("Missing or invalid X-User-Id header.");
 
-            var canceled = await _service.CancelOrderAsync(id, userId);
-            if (!canceled)
-                return NotFound($"Order with ID {id} not found.");
+            var result = await _service.ReturnOrderAsync(orderId, userId);
 
-            return NoContent();
+            if (!result.Success)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
         private bool TryGetUserId(out Guid userId)

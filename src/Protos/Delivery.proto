@@ -6,7 +6,6 @@ package Delivery;
 
 service DeliveryService {
     rpc createDelivery(CreateDeliveryMessage) returns (CreateDeliveryResponse);
-    rpc CancelDelivery(CancelDeliveryMessage) returns (CancelDeliveryResponse);
 }
 
 message CreateDeliveryMessage {
@@ -15,13 +14,5 @@ message CreateDeliveryMessage {
 }
 
 message CreateDeliveryResponse {
-    bool success = 1;
-}
-
-message CancelDeliveryMessage {
-    string orderId = 1;
-}
-
-message CancelDeliveryResponse {
     bool success = 1;
 }
