@@ -1,58 +1,55 @@
-"use client"
+"use client";
 
-import { ProtectedRoute } from "@/components/protected-route"
-import { Navbar } from "@/components/navbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import { apiClient } from "@/lib/api-client"
-import Link from "next/link"
+import { ProtectedRoute } from "@/components/protected-route";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { apiClient } from "@/lib/api-client";
+import Link from "next/link";
 
 interface Delivery {
-  deliveryId: string
-  orderId: string
-  status: string
-  eta?: string | null
-  createdAt: string
-  updatedAt: string
-  userId: string
-  isActive: boolean
+  deliveryId: string;
+  orderId: string;
+  status: string;
+  eta?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  isActive: boolean;
 }
 
 export default function AdminDeliveriesPage() {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([])
-  const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchDeliveries = async () => {
     try {
-      const response = await apiClient.get("/api/Delivery")
-      setDeliveries(response.data)
+      const response = await apiClient.get("/api/Delivery");
+      setDeliveries(response.data);
     } catch (error) {
-      console.error("Failed to fetch deliveries:", error)
+      console.error("Failed to fetch deliveries:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchDeliveries()
-  }, [])
+    fetchDeliveries();
+  }, []);
 
   const filteredDeliveries =
-    statusFilter === "all" ? deliveries : deliveries.filter((d) => d.status === statusFilter)
+    statusFilter === "all" ? deliveries : deliveries.filter((d) => d.status === statusFilter);
 
-  // Helper to make enum display-friendly
   const formatStatus = (status: string) =>
-    status.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())
+    status.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <Navbar />
       <main className="p-6 max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Delivery Management</h1>
-          <p className="text-muted-foreground">Manage and track all deliveries</p>
+          <h1 className="text-3xl font-bold text-blue-700">Delivery Management</h1>
+          <p className="text-gray-600">Manage and track all deliveries</p>
         </div>
 
         <Card className="mb-6">
@@ -76,7 +73,7 @@ export default function AdminDeliveriesPage() {
         </Card>
 
         {loading ? (
-          <div className="text-center py-8">Loading deliveries...</div>
+          <div className="text-center py-8 text-gray-600">Loading deliveries...</div>
         ) : (
           <Card>
             <CardHeader>
@@ -97,7 +94,7 @@ export default function AdminDeliveriesPage() {
                   </thead>
                   <tbody>
                     {filteredDeliveries.map((delivery) => (
-                      <tr key={delivery.deliveryId} className="border-b hover:bg-muted/50">
+                      <tr key={delivery.deliveryId} className="border-b hover:bg-gray-50">
                         <td className="py-2 px-4 font-medium">{delivery.orderId}</td>
                         <td className="py-2 px-4">
                           <span
@@ -111,7 +108,7 @@ export default function AdminDeliveriesPage() {
                         <td className="py-2 px-4 text-sm">
                           {delivery.eta ? new Date(delivery.eta).toLocaleDateString() : "-"}
                         </td>
-                        <td className="py-2 px-4 text-sm text-muted-foreground">
+                        <td className="py-2 px-4 text-sm text-gray-500">
                           {new Date(delivery.createdAt).toLocaleDateString()}
                         </td>
                         <td className="py-2 px-4">
@@ -125,8 +122,9 @@ export default function AdminDeliveriesPage() {
                     ))}
                   </tbody>
                 </table>
+
                 {filteredDeliveries.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">No deliveries found</div>
+                  <div className="text-center py-8 text-gray-500">No deliveries found</div>
                 )}
               </div>
             </CardContent>
@@ -134,7 +132,7 @@ export default function AdminDeliveriesPage() {
         )}
       </main>
     </ProtectedRoute>
-  )
+  );
 }
 
 function getStatusColor(status: string): string {
@@ -144,6 +142,6 @@ function getStatusColor(status: string): string {
     ON_ROUTE: "bg-purple-100 text-purple-800",
     DELIVERED: "bg-green-100 text-green-800",
     CANCELED: "bg-red-100 text-red-800",
-  }
-  return colors[status.toUpperCase()] || "bg-gray-100 text-gray-800"
+  };
+  return colors[status.toUpperCase()] || "bg-gray-100 text-gray-800";
 }
