@@ -8,6 +8,7 @@ using Application.Services.Interfaces;
 using Application.Services.Implementations;
 using Shared.Helpers;
 using UserService.API.Grpc;
+using Shared.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +73,7 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Error seeding admin users: " + ex.Message);
     }
 }
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

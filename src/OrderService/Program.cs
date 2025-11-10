@@ -9,6 +9,7 @@ using Grpc.Net.Client;
 using DeliveryService.GrpcGenerated;
 using static DeliveryService.GrpcGenerated.DeliveryService;
 using API.Grpc;
+using Shared.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,8 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+
 builder.Services.AddGrpc();
 
 builder.Services.AddGrpcClient<DeliveryService.GrpcGenerated.DeliveryService.DeliveryServiceClient>(o =>
@@ -54,7 +57,6 @@ builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.ProductService.Pro
 
 builder.Services.AddScoped<UserGrpcClient>();
 builder.Services.AddScoped<ProductClient>();
-builder.Services.AddScoped<DeliveryGrpcClient>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -67,8 +69,9 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
-
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

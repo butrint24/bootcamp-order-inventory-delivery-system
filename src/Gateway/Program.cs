@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shared.Helpers;
+using Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +26,15 @@ builder.Services.AddCors(o =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddSingleton<JwtHelper>(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     return new JwtHelper(config);
 });
+
+
+builder.Services.AddSingleton<IErrorHandler, ErrorHandler>();
 
 builder.Services.AddReverseProxy()
        .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
@@ -39,6 +44,20 @@ builder.WebHost.UseUrls("http://0.0.0.0:7000");
 var app = builder.Build();
 
 app.UseCors("FrontOnly");
+
+
+var errorHandler = app.Services.GetRequiredService<IErrorHandler>();
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        await errorHandler.HandleAsync(context, ex);
+    }
+});
 
 app.Use(async (context, next) =>
 {
@@ -51,6 +70,8 @@ app.Use(async (context, next) =>
 
     var jwtHelper = context.RequestServices.GetRequiredService<JwtHelper>();
     var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+    context.Request.Headers["X-Trace-Id"] = Guid.NewGuid().ToString();
 
     if (!string.IsNullOrEmpty(token))
     {
