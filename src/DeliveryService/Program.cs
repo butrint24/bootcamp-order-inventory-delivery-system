@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using DeliveryService.API.Mapping;
 using DeliveryService.Application.Clients;
 using DeliveryService.API.Grpc;
+using Shared.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +63,8 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

@@ -8,6 +8,7 @@ using Shared.Entities;
 using UserService.Infrastructure.Repositories.Interfaces;
 using UserService.GrpcGenerated;
 using Shared.Enums;
+using Shared.Exceptions;
 
 namespace Application.Services.Implementations
 {
@@ -27,7 +28,7 @@ namespace Application.Services.Implementations
             var user = _mapper.Map<User>(dto);
 
             if (await _repo.ExistsAsync(user.Tel, user.Email))
-                throw new InvalidOperationException("A user with the same telephone or email already exists.");
+                throw new ConflictException("A user with the same telephone or email already exists.");
 
             await _repo.AddAsync(user);
             await _repo.SaveChangesAsync();
@@ -57,7 +58,7 @@ namespace Application.Services.Implementations
                     string.IsNullOrWhiteSpace(dto.Email) ? existing.Email : dto.Email,
                     existing.UserId))
             {
-                throw new InvalidOperationException("A user with the same telephone or email already exists.");
+                throw new ConflictException("A user with the same telephone or email already exists.");
             }
 
             existing.UpdatePersonalInfo(dto.Name, dto.Surname, dto.DateOfBirth);

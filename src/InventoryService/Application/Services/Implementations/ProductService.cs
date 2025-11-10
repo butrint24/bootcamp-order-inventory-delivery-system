@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using InventoryService.GrpcGenerated;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Shared.Exceptions;
 
 namespace Application.Services.Implementations
 {
@@ -28,7 +30,7 @@ namespace Application.Services.Implementations
         {
             var exists = await _repo.ExistsAsync(dto.Name, dto.Origin);
             if (exists)
-                throw new InvalidOperationException("A product with the same name and origin already exists.");
+                throw new ConflictException("A product with the same name and origin already exists.");
 
             var product = _mapper.Map<Product>(dto);
             await _repo.AddAsync(product);
@@ -71,7 +73,7 @@ namespace Application.Services.Implementations
                     string.IsNullOrWhiteSpace(dto.Origin) ? existing.Origin : dto.Origin,
                     existing.ProductId))
             {
-                throw new InvalidOperationException("Another product with the same name and origin already exists.");
+                throw new ConflictException("Another product with the same name and origin already exists.");
             }
 
             existing.UpdateDetails(
@@ -110,7 +112,7 @@ namespace Application.Services.Implementations
         {
             var product = await _repo.GetByIdAsync(productId);
             if (product == null || product.Stock < quantity)
-                throw new InvalidOperationException("Insufficient stock or product not found.");
+                throw new BadRequestException("Insufficient stock or product not found.");
             
             product.UpdateStock(product.Stock - quantity);
 
