@@ -118,18 +118,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
-              >
-                <option value="user">User (Order & Track)</option>
-                <option value="admin">Admin (Inventory Management)</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
               <label className="text-sm font-medium">Password</label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>

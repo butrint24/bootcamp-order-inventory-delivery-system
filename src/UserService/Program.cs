@@ -57,6 +57,22 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var userRepository = services.GetRequiredService<IUserRepository>();
+        var jwtHelper = services.GetRequiredService<JwtHelper>();
+        await UserSeeder.SeedAdminsAsync(userRepository, jwtHelper);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error seeding admin users: " + ex.Message);
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
