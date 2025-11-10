@@ -145,18 +145,6 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="user">User (Order & Track)</option>
-                <option value="admin">Admin (Inventory Management)</option>
-              </select>
-            </div>
-
-            <div>
               <label className="text-sm font-medium text-gray-700">
                 Password
               </label>

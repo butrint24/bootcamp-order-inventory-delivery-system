@@ -18,9 +18,10 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddCors(o =>
 {
     o.AddPolicy("FrontOnly", p => p
-        .WithOrigins("http://localhost:3000")
+        .WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
         .AllowAnyHeader()
-        .AllowAnyMethod());
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -42,8 +43,6 @@ builder.WebHost.UseUrls("http://0.0.0.0:7000");
 
 var app = builder.Build();
 
-app.UseCors("Localhost3000");
-
 app.UseCors("FrontOnly");
 
 
@@ -62,7 +61,8 @@ app.Use(async (context, next) =>
 
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/api/auth", StringComparison.OrdinalIgnoreCase))
+    if (context.Request.Method == "OPTIONS" || 
+        context.Request.Path.StartsWithSegments("/api/auth", StringComparison.OrdinalIgnoreCase))
     {
         await next();
         return;
