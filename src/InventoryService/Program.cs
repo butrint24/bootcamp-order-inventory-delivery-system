@@ -2,12 +2,13 @@ using InventoryService.Infrastructure.Data;
 using InventoryService.Infrastructure.Repositories.Implementations;
 using InventoryService.Infrastructure.Repositories.Interfaces;
 using Application.Services.Implementations;
-using Application.Services.Interfaces;  
+using Application.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using InventoryService.API.Controllers.Mapping;
 using InventoryService.API.Grpc;
 using InventoryService.Application.Clients;
+using Shared.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,13 +42,11 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 );
 
 builder.Services.AddGrpc();
-
 builder.Services.AddGrpcClient<OrderService.GrpcGenerated.OrderService.OrderServiceClient>(o =>
 {
     o.Address = new Uri(orderServiceUrl);
 });
-
-builder.Services.AddScoped<OrderGrpcClient>();  
+builder.Services.AddScoped<OrderGrpcClient>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -62,6 +61,8 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

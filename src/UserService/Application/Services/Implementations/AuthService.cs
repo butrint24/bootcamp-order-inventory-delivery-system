@@ -6,6 +6,7 @@ using Shared.Helpers;
 using Shared.DTOs;
 using Application.Services.Interfaces;
 using BCrypt.Net;
+using Shared.Exceptions;
 
 namespace Application.Services.Implementations
 {
@@ -23,7 +24,7 @@ namespace Application.Services.Implementations
         public async Task<AuthResponseDto> SignupAsync(SignupRequestDto dto)
         {
             if (await _userRepository.ExistsAsync(dto.Tel ?? "", dto.Email))
-                throw new InvalidOperationException("User with the same email or phone already exists.");
+                throw new ConflictException("User with the same email or phone already exists.");
 
             var user = new User(
                 dto.Name,

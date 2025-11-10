@@ -13,6 +13,8 @@ using OrderService.GrpcGenerated;
 using OrderService.Application.Clients;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Shared.Exceptions;
 
 namespace Application.Services.Implementations
 {
@@ -91,11 +93,14 @@ namespace Application.Services.Implementations
         public async Task<UpdateOrderStatusResponse> UpdateOrderStatusAsync(Guid id, OrderStatus status)
         {
             if (!Enum.IsDefined(typeof(OrderStatus), status))
-                throw new ArgumentException("Invalid order status.");
-
+            {
+                throw new BadRequestException("Invalid order status.");
+            }
             var order = await _repo.GetByIdAsync(id);
             if (order == null)
-                throw new ArgumentException("Order not found.");
+            {
+                throw new NotFoundException("Order not found.");
+            }
 
             order.Status = status;
             _repo.Update(order);
@@ -130,7 +135,7 @@ namespace Application.Services.Implementations
             if(shoppingCartDto.ItemsAndQuantities == null || !shoppingCartDto.ItemsAndQuantities.Any())
             {
                 _logger.LogWarning("Shopping cart is empty for UserId: {UserId}", userId);
-                throw new ArgumentException("Shopping cart cannot be empty.");
+                throw new BadRequestException("Shopping cart cannot be empty.");
             }
 
             var userValidation = await _userClient.ValidateUserAsync(userId, "");
