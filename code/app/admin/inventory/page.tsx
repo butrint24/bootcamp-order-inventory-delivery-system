@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
-import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +15,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-/* --- Tipo sipas BACKEND-it --- */
+/* --- Types (align with backend) --- */
 type Product = {
   productId: string;
   name: string;
   origin: string;
-  category: string;     // ruhet si TEXT/enum i serializuar si string
+  category: string;
   price: number;
   stock: number;
 };
@@ -34,8 +33,16 @@ type ProductForm = {
   stock: number | "";
 };
 
-/* --- OPSIONET e kategorisë (përputhi me Shared.Enums.Category) --- */
-const CATEGORIES = ["OTHER", "FOOD", "ELECTRONICS", "FURNITURE"] as const;
+/* --- Match backend enum exactly --- */
+const CATEGORIES = [
+  "ELECTRONICS",
+  "CLOTHING",
+  "HEALTH_AND_BEAUTY",
+  "ACCESSORIES",
+  "FURNITURE",
+  "ENTERTAINMENT",
+  "OTHER",
+] as const;
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -56,7 +63,6 @@ export default function InventoryPage() {
     try {
       setError("");
       const res = await apiClient.get("/api/Product");
-      // nëse kthen { items: [...] } ose thjesht [...]
       const data = res.data?.items ?? res.data ?? [];
       setProducts(
         data.map((p: any) => ({
@@ -93,19 +99,20 @@ export default function InventoryPage() {
   const saveProduct = async () => {
     setError("");
 
-    if (!form.name.trim()) return setError("Name është i detyrueshëm.");
-    if (!form.origin.trim()) return setError("Origin është i detyrueshëm.");
-    if (!form.category.trim()) return setError("Category është i detyrueshëm.");
-    if (form.price === "" || Number(form.price) <= 0) return setError("Price duhet të jetë > 0.");
-    if (form.stock === "" || Number(form.stock) < 0) return setError("Stock s’mund të jetë negativ.");
+    if (!form.name.trim()) return setError("Name is required.");
+    if (!form.origin.trim()) return setError("Origin is required.");
+    if (!form.category.trim()) return setError("Category is required.");
+    if (form.price === "" || Number(form.price) <= 0)
+      return setError("Price must be greater than 0.");
+    if (form.stock === "" || Number(form.stock) < 0)
+      return setError("Stock cannot be negative.");
 
-    // DTO i saktë për .NET (PascalCase)
     const payload = {
       Name: form.name,
-      Stock: Number(form.stock),
       Origin: form.origin,
+      Category: form.category, // 👈 must match backend enum (e.g., ELECTRONICS)
       Price: Number(form.price),
-      Category: form.category, // p.sh. "OTHER"
+      Stock: Number(form.stock),
     };
 
     try {
@@ -155,16 +162,21 @@ export default function InventoryPage() {
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <Navbar />
-      <main className="p-6 max-w-7xl mx-auto">
+      <main className="p-8 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Inventory Management</h1>
-            <p className="text-muted-foreground">Manage products and stock</p>
+            <h1 className="text-3xl font-bold text-blue-700">Inventory Management</h1>
+            <p className="text-gray-500">Manage products and stock efficiently</p>
           </div>
+
           <Dialog open={dialogOpen} onOpenChange={handleDialogChange}>
             <DialogTrigger asChild>
-              <Button>{editingId ? "Edit Product" : "Add Product"}</Button>
+              <Button
+                variant="outline"
+                className="text-blue-700 border-blue-600 hover:bg-blue-600 hover:text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                {editingId ? "Edit Product" : "Add Product"}
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
@@ -172,12 +184,19 @@ export default function InventoryPage() {
                 <DialogDescription>Enter product details</DialogDescription>
               </DialogHeader>
 
-              {error && <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">{error}</div>}
+              {error && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
+                  {error}
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium">Name</label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
                 </div>
 
                 <div>
@@ -185,7 +204,7 @@ export default function InventoryPage() {
                   <Input
                     value={form.origin}
                     onChange={(e) => setForm({ ...form, origin: e.target.value })}
-                    placeholder="p.sh. Germany"
+                    placeholder="e.g. Germany"
                   />
                 </div>
 
@@ -193,12 +212,14 @@ export default function InventoryPage() {
                   <div>
                     <label className="text-sm font-medium">Category</label>
                     <select
-                      className="w-full px-3 py-2 border rounded-md bg-background"
+                      className="w-full px-3 py-2 border rounded-md bg-white"
                       value={form.category}
                       onChange={(e) => setForm({ ...form, category: e.target.value })}
                     >
                       {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
+                        <option key={c} value={c}>
+                          {c.replaceAll("_", " ")}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -209,7 +230,12 @@ export default function InventoryPage() {
                       type="number"
                       step="0.01"
                       value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value === "" ? "" : Number(e.target.value) })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          price: e.target.value === "" ? "" : Number(e.target.value),
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -219,11 +245,19 @@ export default function InventoryPage() {
                   <Input
                     type="number"
                     value={form.stock}
-                    onChange={(e) => setForm({ ...form, stock: e.target.value === "" ? "" : Number(e.target.value) })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        stock: e.target.value === "" ? "" : Number(e.target.value),
+                      })
+                    }
                   />
                 </div>
 
-                <Button onClick={saveProduct} className="w-full">
+                <Button
+                  onClick={saveProduct}
+                  className="w-full transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                >
                   {editingId ? "Update Product" : "Create Product"}
                 </Button>
               </div>
@@ -232,21 +266,21 @@ export default function InventoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="text-center py-8 text-gray-500">Loading...</div>
         ) : (
           <Card>
             <CardHeader>
               <CardTitle>Products</CardTitle>
-              <CardDescription>All products in inventory</CardDescription>
+              <CardDescription>All products in stock</CardDescription>
             </CardHeader>
             <CardContent>
               {products.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No products</div>
+                <div className="text-center py-8 text-gray-500">No products found</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b">
+                      <tr className="border-b bg-gray-50">
                         <th className="text-left py-2 px-4">Name</th>
                         <th className="text-left py-2 px-4">Origin</th>
                         <th className="text-left py-2 px-4">Category</th>
@@ -257,18 +291,31 @@ export default function InventoryPage() {
                     </thead>
                     <tbody>
                       {products.map((p) => (
-                        <tr key={p.productId} className="border-b hover:bg-muted/50">
-                          <td className="py-2 px-4">{p.name}</td>
-                          <td className="py-2 px-4 text-muted-foreground">{p.origin}</td>
-                          <td className="py-2 px-4 text-muted-foreground">{p.category}</td>
+                        <tr
+                          key={p.productId}
+                          className="border-b hover:bg-gray-50 transition"
+                        >
+                          <td className="py-2 px-4 font-medium">{p.name}</td>
+                          <td className="py-2 px-4 text-gray-600">{p.origin}</td>
+                          <td className="py-2 px-4 text-gray-600">{p.category}</td>
                           <td className="py-2 px-4">${p.price.toFixed(2)}</td>
                           <td className="py-2 px-4">{p.stock}</td>
                           <td className="py-2 px-4">
                             <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => onEdit(p)}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="transition-transform duration-200 hover:scale-105"
+                                onClick={() => onEdit(p)}
+                              >
                                 Edit
                               </Button>
-                              <Button size="sm" variant="destructive" onClick={() => onDelete(p.productId)}>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="transition-transform duration-200 hover:scale-105 hover:shadow-md"
+                                onClick={() => onDelete(p.productId)}
+                              >
                                 Delete
                               </Button>
                             </div>

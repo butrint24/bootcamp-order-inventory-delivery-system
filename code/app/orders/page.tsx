@@ -1,4 +1,3 @@
-// app/orders/page.tsx
 "use client";
 
 import {
@@ -34,14 +33,14 @@ const PRODUCTS_PATH = "/api/Product";
 
 const getStatusColor = (status: string): string => {
   const colors: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    confirmed: "bg-blue-100 text-blue-800",
-    shipped: "bg-purple-100 text-purple-800",
-    delivered: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
-    other: "bg-gray-100 text-gray-800",
+    pending: "bg-yellow-100 text-yellow-700",
+    confirmed: "bg-blue-100 text-blue-700",
+    shipped: "bg-purple-100 text-purple-700",
+    delivered: "bg-green-100 text-green-700",
+    cancelled: "bg-red-100 text-red-700",
+    other: "bg-gray-100 text-gray-700",
   };
-  return colors[status?.toLowerCase()] || "bg-gray-100 text-gray-800";
+  return colors[status?.toLowerCase()] || "bg-gray-100 text-gray-700";
 };
 
 function normalizeOrders(raw: any): OrderRow[] {
@@ -78,7 +77,7 @@ function CreateOrderBox({ onCreated }: { onCreated: () => void }) {
         }));
         setProducts(list);
       })
-      .catch((e) => setErr(e?.response?.data?.message || e.message || "S’po mundem me i marrë produktet"));
+      .catch((e) => setErr(e?.response?.data?.message || e.message || "Failed to fetch products"));
   }, []);
 
   const total = useMemo(
@@ -95,38 +94,35 @@ function CreateOrderBox({ onCreated }: { onCreated: () => void }) {
   const createOrder = async () => {
     setErr("");
 
-    if (!address.trim()) return setErr("Shkruaj adresën e dërgesës");
-    if (items.some((it) => !it.productId)) return setErr("Zgjidh produktin për çdo rresht");
-    if (!user) return setErr("S’je i kyçur");
+    if (!address.trim()) return setErr("Please enter a delivery address");
+    if (items.some((it) => !it.productId)) return setErr("Select a product for each item");
+    if (!user) return setErr("You must be logged in");
 
     const orderId = crypto.randomUUID();
 
     const payload = {
-      OrderId: orderId, // nëse e heq [Required] te backend, mund ta lësh pa këtë fushë
+      OrderId: orderId,
       Address: address,
       Price: Number(total.toFixed(2)),
       Status: "PENDING",
-      // MOS dërgo CreatedAt – e vendos serveri
       Items: items.map((it) => ({
         OrderItemId: crypto.randomUUID(),
-        OrderId: orderId, // njësoj me OrderId e porosisë
+        OrderId: orderId,
         ProductId: it.productId,
         Quantity: Number(it.quantity) || 1,
-        // MOS dërgo CreatedAt – e vendos serveri
       })),
     };
 
     try {
       setLoading(true);
-      await apiClient.post(ORDERS_PATH, payload); // X-User-Id + Bearer shtohen nga interceptor-i
+      await apiClient.post(ORDERS_PATH, payload);
       setAddress("");
       setItems([{ productId: "", quantity: 1 }]);
       onCreated();
     } catch (e: any) {
-      console.error("Create order failed:", e?.response?.status, e?.response?.data);
       const modelErrors =
         e?.response?.data?.errors ? Object.values(e.response.data.errors).flat().join(" | ") : null;
-      setErr(modelErrors || e?.response?.data?.message || e.message || "Krijimi dështoi");
+      setErr(modelErrors || e?.response?.data?.message || e.message || "Order creation failed");
     } finally {
       setLoading(false);
     }
@@ -134,18 +130,18 @@ function CreateOrderBox({ onCreated }: { onCreated: () => void }) {
 
   return (
     <div className="space-y-4">
-      {err && <div className="bg-destructive/10 text-destructive text-sm p-3 rounded">{err}</div>}
+      {err && <div className="bg-red-50 text-red-600 text-sm p-3 rounded border border-red-200">{err}</div>}
 
       <div>
-        <label className="text-sm font-medium">Address</label>
-        <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="p.sh. Agim Ramadani 12" />
+        <label className="text-sm font-medium text-gray-700">Delivery Address</label>
+        <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g., 123 Main St" />
       </div>
 
       <div className="space-y-3">
         {items.map((it, idx) => (
           <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <select
-              className="w-full px-3 py-2 border border-input rounded-md bg-background"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500"
               value={it.productId}
               onChange={(e) => setItems((x) => x.map((row, i) => (i === idx ? { ...row, productId: e.target.value } : row)))}
             >
@@ -171,22 +167,22 @@ function CreateOrderBox({ onCreated }: { onCreated: () => void }) {
           </div>
         ))}
         <Button variant="secondary" onClick={addItem}>
-          + Add item
+          + Add Item
         </Button>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-t pt-3">
         <div className="text-sm text-muted-foreground">Total</div>
-        <div className="text-lg font-semibold">${total.toFixed(2)}</div>
+        <div className="text-lg font-semibold text-blue-600">${total.toFixed(2)}</div>
       </div>
 
-      <Button onClick={createOrder} disabled={loading || products.length === 0}>
+      <Button
+        onClick={createOrder}
+        disabled={loading || products.length === 0}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+      >
         {loading ? "Creating..." : "Create Order"}
       </Button>
-
-      {products.length === 0 && (
-        <p className="text-sm text-muted-foreground">S’ka produkte të disponueshme. Kërko nga admini t’i shtojë.</p>
-      )}
     </div>
   );
 }
@@ -216,9 +212,21 @@ export default function OrdersPage() {
       <main className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">My Orders</h1>
-            <p className="text-muted-foreground">View and manage your orders</p>
+            <h1 className="text-3xl font-bold text-blue-600">My Orders</h1>
+            <p className="text-gray-500">View and manage your orders</p>
           </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">+ New Order</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Create New Order</DialogTitle>
+                <DialogDescription>Fill in the details below to place an order.</DialogDescription>
+              </DialogHeader>
+              <CreateOrderBox onCreated={() => { fetchOrders(); setDialogOpen(false); }} />
+            </DialogContent>
+          </Dialog>
         </div>
 
         {loading ? (
@@ -231,7 +239,7 @@ export default function OrdersPage() {
             </CardHeader>
             <CardContent>
               {orders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No orders found</div>
+                <div className="text-center py-8 text-gray-500">No orders found</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {orders.map((order) => {
@@ -241,18 +249,22 @@ export default function OrdersPage() {
                     const status = order.status ?? "OTHER";
                     return (
                       <Link key={id} href={`/orders/${id}`}>
-                        <div className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="p-4 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all">
                           <div className="flex justify-between items-start mb-2">
                             <div>
-                              <p className="font-bold">Order #{order.orderNumber ?? (id ? id.slice(0, 8) : "—")}</p>
-                              <p className="text-sm text-muted-foreground">{created}</p>
+                              <p className="font-semibold text-blue-600">
+                                Order #{order.orderNumber ?? (id ? id.slice(0, 8) : "—")}
+                              </p>
+                              <p className="text-sm text-gray-500">{created}</p>
                             </div>
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(status)}`}>{status}</span>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(status)}`}>
+                              {status}
+                            </span>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">
+                          <p className="text-sm text-gray-500 mb-2">
                             {(order.items?.length ?? 0)} item{(order.items?.length ?? 0) !== 1 ? "s" : ""}
                           </p>
-                          <p className="font-bold text-lg">${amount.toFixed(2)}</p>
+                          <p className="font-bold text-lg text-gray-900">${amount.toFixed(2)}</p>
                         </div>
                       </Link>
                     );

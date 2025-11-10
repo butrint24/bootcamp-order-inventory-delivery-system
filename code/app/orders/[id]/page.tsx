@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { apiClient } from "@/lib/api-client"
 import { useParams } from "next/navigation"
@@ -51,8 +52,12 @@ export default function OrderDetailPage() {
 
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
+
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(false)
+
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [returnLoading, setReturnLoading] = useState(false)
 
   const fetchOrder = async () => {
     try {
@@ -99,7 +104,26 @@ export default function OrderDetailPage() {
     }
   }
 
+  const handleReturn = async () => {
+    if (!order) return
+    try {
+      setReturnLoading(true)
+      await apiClient.post(`/api/Order/return-order/${order.orderId}`)
+      setReturnDialogOpen(false)
+      await fetchOrder()
+    } catch (err: any) {
+      console.error("Failed to return order:", err)
+      alert(err?.response?.data?.message || "Failed to return order")
+    } finally {
+      setReturnLoading(false)
+    }
+  }
+
   const canCancel = order && ["pending", "processing"].includes(order.status.toLowerCase())
+
+  const canReturn =
+    order &&
+    ["completed", "delivered", "shipped"].includes(order.status.toLowerCase())
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -108,9 +132,14 @@ export default function OrderDetailPage() {
       case "processing":
         return "bg-blue-100 text-blue-800"
       case "completed":
+      case "delivered":
         return "bg-green-100 text-green-800"
+      case "shipped":
+        return "bg-blue-200 text-blue-900"
       case "cancelled":
         return "bg-red-100 text-red-800"
+      case "returned":
+        return "bg-purple-100 text-purple-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -203,38 +232,74 @@ export default function OrderDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Cancel Order Button */}
-            {canCancel && (
-              <div className="flex justify-center">
-                <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" className="mt-4">
-                      Cancel Order
+            {/* Cancel & Return Buttons */}
+            <div className="flex justify-center gap-4">
+              {/* Cancel */}
+              <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="mt-4"
+                    disabled={!canCancel}
+                  >
+                    Cancel Order
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Cancel Order</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to cancel this order? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+                      No, Keep
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                      <DialogTitle>Cancel Order</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to cancel this order? This action cannot be undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex justify-end gap-3 mt-4">
-                      <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
-                        No, Keep
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={handleCancel}
-                        disabled={cancelLoading}
-                      >
-                        {cancelLoading ? "Cancelling..." : "Yes, Cancel"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            )}
+                    <Button
+                      variant="destructive"
+                      onClick={handleCancel}
+                      disabled={cancelLoading}
+                    >
+                      {cancelLoading ? "Cancelling..." : "Yes, Cancel"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Return */}
+              <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    className="mt-4"
+                    disabled={!canReturn}
+                  >
+                    Return Order
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Return Order</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to return this order? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>
+                      No, Keep
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={handleReturn}
+                      disabled={returnLoading}
+                    >
+                      {returnLoading ? "Returning..." : "Yes, Return"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
 
             {/* Delivery Information */}
             {order.delivery && (
