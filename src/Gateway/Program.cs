@@ -45,20 +45,6 @@ var app = builder.Build();
 
 app.UseCors("FrontOnly");
 
-
-var errorHandler = app.Services.GetRequiredService<IErrorHandler>();
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next();
-    }
-    catch (Exception ex)
-    {
-        await errorHandler.HandleAsync(context, ex);
-    }
-});
-
 app.Use(async (context, next) =>
 {
     if (context.Request.Method == "OPTIONS" || 
