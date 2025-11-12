@@ -39,7 +39,6 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 builder.Services.AddScoped<IOrderService, Application.Services.Implementations.OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-
 builder.Services.AddGrpc();
 
 builder.Services.AddGrpcClient<DeliveryService.GrpcGenerated.DeliveryService.DeliveryServiceClient>(o =>
@@ -55,6 +54,8 @@ builder.Services.AddGrpcClient<InventoryService.GrpcGenerated.ProductService.Pro
     o.Address = new Uri(inventoryServiceUrl);
 });
 
+builder.Services.AddScoped<DeliveryGrpcClient>();
+
 builder.Services.AddScoped<UserGrpcClient>();
 builder.Services.AddScoped<ProductClient>();
 
@@ -69,6 +70,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
     });
 });
+
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();

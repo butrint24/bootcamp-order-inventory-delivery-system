@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 
@@ -18,13 +18,13 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
   description = "Are you sure you want to purchase these items?",
 }) => {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4">
-        <Dialog.Overlay className="fixed inset-0 bg-black/30" />
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
 
-        <div className="relative bg-white rounded-lg max-w-md mx-auto p-6 z-10">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="bg-white rounded-lg max-w-md mx-auto p-6 shadow-lg">
           <Dialog.Title className="text-lg font-bold mb-2">{title}</Dialog.Title>
-          <Dialog.Description className="text-sm text-muted-foreground mb-4">
+          <Dialog.Description className="text-sm text-gray-600 mb-4">
             {description}
           </Dialog.Description>
 
@@ -34,7 +34,7 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
             </Button>
             <Button onClick={onConfirm}>Confirm</Button>
           </div>
-        </div>
+        </Dialog.Panel>
       </div>
     </Dialog>
   );

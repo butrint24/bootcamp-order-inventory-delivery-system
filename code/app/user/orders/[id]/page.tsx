@@ -1,7 +1,6 @@
 "use client"
 
 import { ProtectedRoute } from "@/components/protected-route"
-import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -147,10 +146,14 @@ export default function OrderDetailPage() {
 
   return (
     <ProtectedRoute requiredRole="user">
-      <Navbar />
       <main className="p-6 max-w-5xl mx-auto space-y-6">
-        <Link href="/orders">
-          <Button variant="ghost">← Back to Orders</Button>
+        <Link href="/user/orders">
+          <Button
+            variant="ghost"
+            className="text-blue-600 hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200"
+          >
+            ← Back to Orders
+          </Button>
         </Link>
 
         {loading ? (

@@ -45,13 +45,13 @@ export function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/dashboard" className="text-sm hover:text-primary">
-                    Dashboard
+                  <Link href="/user/dashboard" className="text-sm hover:text-primary">
+                    Products
                   </Link>
-                  <Link href="/orders" className="text-sm hover:text-primary">
+                  <Link href="/user/orders" className="text-sm hover:text-primary">
                     Orders
                   </Link>
-                  <Link href="/deliveries" className="text-sm hover:text-primary">
+                  <Link href="/user/deliveries" className="text-sm hover:text-primary">
                     Deliveries
                   </Link>
                 </>
